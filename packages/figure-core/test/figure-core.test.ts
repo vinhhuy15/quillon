@@ -296,7 +296,8 @@ describe('TikZ export', () => {
     expect(tex).toContain('$\\displaystyle \\frac{a}{b}$');
     expect(tex).toContain('100\\% $x_1$');
     expect(tex).toContain('arrows={{Circle}-{Stealth[length=');
-    expect(tex).toContain('rotate around={30:');
+    // clockwise on screen = negative in TikZ's y-up frame
+    expect(tex).toContain('rotate around={-30:');
     expect(tex).toContain('ellipse [x radius=60');
     expect(tex).toContain('plot coordinates');
     expect(tex).toContain('\\definecolor{sf1}{HTML}{FF0000}');

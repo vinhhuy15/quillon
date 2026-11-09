@@ -1,84 +1,175 @@
+<div align="center">
+
+<img src="apps/desktop/public/favicon.svg" width="72" height="72" alt="SciForge logo">
+
 # SciForge
 
-**An open-source toolkit for equations and scientific figures**, for researchers, teachers and students.
+**Equations, diagrams and scientific figures in one open-source app**<br>
+for researchers, teachers and students
 
-> v0.2: equation editor plus drawing, diagrams and function plots (Phases 0–2).
-> Figure composition, data charts and more are on the [roadmap](docs/ROADMAP.md).
+[![CI](https://github.com/vinhhuy15/sciforge/actions/workflows/ci.yml/badge.svg)](https://github.com/vinhhuy15/sciforge/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+![Version](https://img.shields.io/badge/version-0.2.0-informational)
+![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-lightgrey)
+
+[Download](#download) · [How it works](#how-it-works) · [Features](#features) · [Build from source](#build-from-source) · [Roadmap](docs/ROADMAP.md)
+
+</div>
+
+![SciForge: a lab report with a circuit, numbered equations and a function plot](docs/images/overview.png)
+
+SciForge combines what usually takes three tools: an equation editor in the spirit of MathType, a diagram
+editor for circuits, mechanics and flowcharts, and a plotter for functions. Everything lives on one page,
+renders with real TeX typography, and goes straight into **Word** (as native, editable equations) or
+**LaTeX** (as TikZ).
+
+## Download
+
+| Platform | |
+|---|---|
+| **Windows 10/11** | `SciForge_0.2.0_x64-setup.exe` from [Releases](https://github.com/vinhhuy15/sciforge/releases). Installs per user, no admin rights needed. |
+| **macOS / Linux** | `.dmg`, `.deb` and `.AppImage` builds come from CI (see [Actions](https://github.com/vinhhuy15/sciforge/actions)), or [build from source](#build-from-source). |
+| **Browser** | Run `npm run dev` and open `http://localhost:1420`. The whole app works in a modern browser. |
+
+## How it works
+
+### 1. Write the math
+
+Type an equation the way you would say it, or type LaTeX. Pick symbols and structures from 11 palettes,
+or start from one of ~50 templates. Equations are numbered automatically, in reading order.
+
+![The equation editor with templates and symbol palettes](docs/images/equations.png)
+
+### 2. Draw the figure
+
+Pick a tool on the left, or drag a symbol from the **Shapes** panel. Wires snap to the terminals of circuit
+symbols, and arrows stay attached to the shapes they connect. Labels anywhere can contain math, such as `$\vec F_f$`.
+Plots take formulas written as you would on paper: `2x^2 - 3x + 1`, `sin x`, `e^(-x^2)`, `|x|`.
+
+![A block on an incline and a converging lens ray diagram](docs/images/physics.png)
+
+![A flowchart with decision, loop and labelled connectors](docs/images/flowchart.png)
+
+### 3. Export it where it is needed
+
+**Copy for Word** pastes an equation as a native Word equation you can still edit, and a drawing as a sharp
+picture. **Export** writes PNG, SVG, Word, TikZ, LaTeX or HTML.
+
+![The export dialog](docs/images/export.png)
+
+The TikZ export compiles with plain `pdflatex`. Here is the page above, typeset by LaTeX:
+
+![The same page compiled from the TikZ export](docs/images/tikz-output.png)
+
+Exported PNG and SVG files carry their source with them. Drop one back into SciForge and it becomes editable again.
 
 ## Features
 
-### Equations
-| | |
-|---|---|
-| **WYSIWYG editor** | Type math directly or type LaTeX (`\frac`, `\alpha`…); 11 symbol palettes (Greek, operators, relations, arrows, structures, sums & integrals, brackets, matrices, functions, chemistry, misc) |
-| **Templates** | ~50 ready-made formulas: algebra, trigonometry, calculus, linear algebra, probability, physics, chemistry, with search |
-| **Library** | Save the formulas you use often |
-| **Numbering** | Automatic equation numbers in reading order |
-| **Word** | *Copy for Word* pastes a **native, editable Word equation** |
+**Equations**
+- WYSIWYG editing with LaTeX input, 11 symbol palettes and ~50 templates (algebra, trigonometry, calculus, linear algebra, probability, physics, chemistry, including `\ce{}`)
+- Automatic numbering, display or inline style, size and color, a personal library of saved formulas
+- Copy as a native Word equation, or as LaTeX, MathML or an image
 
-### Drawing and diagrams (new in 0.2)
-| | |
-|---|---|
-| **Shapes** | Rectangle, rounded rectangle, ellipse, diamond, terminator, parallelogram, triangle, hexagon; fill, stroke, dash, rotation, labels with inline math |
-| **Lines & connectors** | Straight, elbow and curved lines with arrow heads; ends attach to shapes and follow them when they move; labels |
-| **Flowcharts** | Shapes + elbow connectors, with typical meanings in the shape picker |
-| **Symbol library** | 45 symbols: circuits (resistors, capacitors, sources, meters, diodes, op-amp…), mechanics (springs, masses, pulleys, supports, inclines…), optics (lenses, mirrors, prism), lab glassware. Wires snap to the terminals of circuit symbols |
-| **Function plots** | y = f(x), parametric and polar curves; textbook (axes through the origin) or framed (paper) style; grid, legend, axis labels with math. Formulas are typed the way you write them: `2x^2 - 3x + 1`, `sin x`, `e^(-x^2)`, `|x|` |
-| **Text with math** | `Speed $v = \frac{d}{t}$ in m/s`: inline math anywhere text appears |
-| **Editing** | Resize and rotate handles, Shift for squares and 15° angles, snap to grid, align & distribute, group, lock, z-order, context menu, drag-and-drop from the panel |
+**Drawing and diagrams**
+- Shapes: rectangle, rounded rectangle, ellipse, diamond, terminator, parallelogram, triangle, hexagon, with fill, stroke, dash style and rotation
+- Lines and arrows: straight, elbow or curved, five arrow heads, labels; connectors stay attached when you move things
+- 45 symbols: circuits (resistors, capacitors, inductors, sources, meters, diodes, LED, op-amp, switch, ground…), mechanics (spring, damper, mass, cart, pulley, incline, supports, pendulum…), optics (lenses, mirror, prism, screen, eye) and lab glassware
+- Text with inline math anywhere: `Speed $v = \frac{d}{t}$ in m/s`
+- Resize, rotate and flip handles; snap to grid; align and distribute; group, lock and z-order; right-click menu
 
-### Files and export
-| | |
-|---|---|
-| **`.sci` files** | Open format (ZIP + JSON), autosave and crash recovery |
-| **PNG / SVG** | 96–1200 DPI, transparent background; exported images embed their source, so dropping them back into SciForge makes them editable again |
-| **TikZ** | Standalone TikZ picture (compiles with pdflatex) for LaTeX papers; Copy TikZ for pasting into an existing document |
-| **LaTeX** | `.tex` document with equations, text and TikZ figures |
-| **Word** | `.docx` with native equations; drawings become embedded pictures |
-| **HTML** | MathML equations and inline SVG figures |
-| **Localization** | English UI, with a Vietnamese translation |
+**Plots**
+- y = f(x), parametric and polar curves, several per plot, with colors, dashes and legend
+- Textbook axes (through the origin, with arrows) or framed axes (for papers), grid and axis labels with math
+- Asymptotes such as `tan x` are detected and broken cleanly
 
-## Getting started
+**Files and export**
+
+| Format | What you get |
+|---|---|
+| `.sci` | SciForge document: an open ZIP + JSON format ([spec](docs/FILE_FORMAT.md)), with autosave and crash recovery |
+| PNG | 96–1200 DPI, transparent or white background; re-editable in SciForge |
+| SVG | Vector graphics; re-editable in SciForge |
+| Word `.docx` | Native equations (numbered with tab stops); drawings embedded as pictures |
+| TikZ `.tex` | Standalone picture for LaTeX papers; also *Copy TikZ* for pasting into an existing document |
+| LaTeX `.tex` | Article with equations, text and TikZ figures |
+| HTML | MathML equations and inline SVG figures |
+
+**Everywhere:** unlimited undo/redo, English and Vietnamese interface, keyboard shortcuts for every tool.
+
+## Keyboard shortcuts
+
+| Keys | Action |
+|---|---|
+| `V` `H` | Select · pan |
+| `M` `T` | Equation · text |
+| `R` `O` `L` `A` | Rectangle · ellipse · line · arrow |
+| `P` | Function plot |
+| `Shift` while drawing | Square or circle, 15° angles, keep proportions |
+| Double-click | Edit an equation, text or label · on empty space: new equation |
+| `Ctrl+Shift+C` | Copy for Word |
+| `Ctrl+G` / `Ctrl+Shift+G` | Group / ungroup |
+| `Ctrl+R` · `Ctrl+L` | Rotate 90° · lock |
+| `Ctrl+J` · `Ctrl+\` | Show or hide the equation editor · the insert panel |
+| `Ctrl+E` | Export |
+
+`F1` in the app lists all shortcuts.
+
+## Build from source
 
 Requires Node.js ≥ 20.
 
 ```bash
+git clone https://github.com/vinhhuy15/sciforge.git
+cd sciforge
 npm install
-npm run dev        # opens http://localhost:1420
+npm run dev          # http://localhost:1420
 ```
 
 ```bash
-npm test           # unit tests
+npm test             # unit tests (document model, math pipeline, figures, palette content)
 npm run typecheck
-npm run build      # static web build in apps/desktop/dist
+npm run build        # static web build in apps/desktop/dist
 ```
 
-### Desktop app (Windows / macOS / Linux)
-
-Additionally requires [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/)
-(on Windows: *Microsoft C++ Build Tools* + WebView2, which ships with Windows 11).
+**Desktop app.** This also needs [Rust](https://rustup.rs) and the [Tauri prerequisites](https://tauri.app/start/prerequisites/)
+(on Windows: *Microsoft C++ Build Tools* and WebView2, which Windows 11 already has).
 
 ```bash
-npm run tauri dev      # desktop window with hot reload
-npm run tauri build    # installers: .msi/.exe (Windows), .dmg (macOS), .deb/.AppImage (Linux)
+npm run tauri dev               # desktop window with hot reload
+npm run tauri build             # installers for the current OS
 ```
 
-## Repository layout
+The README screenshots are produced by `node scripts/screenshots.mjs` while `npm run dev` is running.
+
+## Project layout
 
 ```
-packages/doc-model     Document model: schema, pure commands, undo/redo, .sci files
-packages/math-core     LaTeX → SVG/MathML (MathJax), MathML → OMML (Word), .docx, PNG/SVG metadata
-packages/figure-core   Scene layout for every node type, shapes, connectors, symbols, plots, TikZ export
-apps/desktop           React + MathLive app; src-tauri/ is the Tauri 2 desktop shell
+packages/doc-model     Document schema, validation and migration, pure commands, undo/redo, .sci files
+packages/math-core     LaTeX → SVG/MathML (MathJax), MathML → OMML for Word, .docx writer, image metadata
+packages/figure-core   Layout of every object, shapes, connectors, symbols, plots, rich text, TikZ export
+apps/desktop           React app (MathLive editor); src-tauri/ is the Tauri 2 desktop shell
 docs/                  Architecture, file format, roadmap
 ```
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/FILE_FORMAT.md](docs/FILE_FORMAT.md).
+How the pieces fit together is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Roadmap
+
+| | Phase | |
+|---|---|---|
+| ✅ | 0–1 · Foundation and equation editor | v0.1 |
+| ✅ | 2 · Drawing, diagrams, symbols, plots, TikZ | v0.2 |
+| ⏭ | 3 · Constraint-based geometry and basic 3D | next |
+| | 4 · Figure composer, journal presets, image tools | |
+| | 5 · Data charts, curve fitting, plot digitizer | |
+| | 6 · Plugins, math OCR, symbolic calculator, Office add-in | |
+
+Details and known gaps: [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Contributions of every kind are welcome: code, symbols, templates, translations.
+Bug reports, symbols, templates, translations and code are all welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[Apache-2.0](LICENSE). Third-party libraries: MathJax (Apache-2.0), MathLive (MIT), fflate (MIT), React (MIT), Tauri (Apache-2.0/MIT).
+[Apache-2.0](LICENSE). Built on MathJax (Apache-2.0), MathLive (MIT), fflate (MIT), React (MIT) and Tauri (Apache-2.0/MIT).

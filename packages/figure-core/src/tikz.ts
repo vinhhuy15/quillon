@@ -135,7 +135,8 @@ export function sceneToTikz(nodes: SciNode[], opts: TikzOptions = {}): string {
       }
       case 'shape': {
         const c = { x: n.x + n.width / 2, y: n.y + n.height / 2 };
-        const rot = n.rotation ? `rotate around={${n2(n.rotation)}:${pt(c)}}` : '';
+        // TikZ rotates in its own y-up frame, so a clockwise on-screen angle is negative there.
+        const rot = n.rotation ? `rotate around={${n2(-n.rotation)}:${pt(c)}}` : '';
         const st = style({ stroke: n.strokeWidth > 0 ? n.stroke : 'none', fill: n.fill, width: n.strokeWidth, dash: n.dash });
         const opt = [st, rot].filter(Boolean).join(', ');
         if (n.shape === 'rect' || n.shape === 'roundrect' || n.shape === 'stadium') {
@@ -172,7 +173,7 @@ export function sceneToTikz(nodes: SciNode[], opts: TikzOptions = {}): string {
         const def = getSymbol(n.symbol);
         if (!def) break;
         const c = { x: n.width / 2, y: n.height / 2 };
-        const scope = [`shift={${pt({ x: n.x, y: n.y })}}`, n.rotation ? `rotate around={${n2(n.rotation)}:${pt(c)}}` : ''].filter(Boolean).join(', ');
+        const scope = [`shift={${pt({ x: n.x, y: n.y })}}`, n.rotation ? `rotate around={${n2(-n.rotation)}:${pt(c)}}` : ''].filter(Boolean).join(', ');
         emit(`\\begin{scope}[${scope}]`);
         for (const p of localPrims({ def, width: n.width, height: n.height, flip: n.flip, stroke: n.stroke, strokeWidth: n.strokeWidth, fill: n.fill })) {
           if (p.t === 'path') {
@@ -242,7 +243,8 @@ function emitPlot(
     emit(`\\draw[${style({ stroke: '#1f2937', width: 1 })}] ${pt(w({ x: a.x, y: a.y }))} rectangle ${pt(w({ x: a.x + a.width, y: a.y + a.height }))};`);
     const tl = fs * 0.4;
     for (const t of g.ticksX) {
-      emit(`\\draw[${style({ stroke: '#1f2937', width: 1 })}] ${pt(w({ x: t.px, y: a.y + a.height }))} -- ++(0,${n2(-tl)}) node[below=2pt, inner sep=0pt, ${font}, text=${ink}] {$${t.label.replace('−', '-')}$};`);
+      emit(`\\draw[${style({ stroke: '#1f2937', width: 1 })}] ${pt(w({ x: t.px, y: a.y + a.height }))} -- ++(0,${n2(-tl)});`);
+      nodeAt(w({ x: t.px, y: a.y + a.height + fs * 0.9 }), `$${t.label.replace('−', '-')}$`, `inner sep=0pt, ${font}, text=${ink}`);
     }
     const clash = cornerClash(g, fs);
     for (const [i, t] of g.ticksY.entries()) {
