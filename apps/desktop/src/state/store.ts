@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { Editor, type EditorState, type ShapeKind } from '@quillon/doc-model';
+import type { ColorVision } from '@quillon/figure-core';
 
 /** Tiny observable store for UI-only state. */
 export function createStore<T extends object>(initial: T) {
@@ -71,6 +72,9 @@ export interface UiState {
   dockOpen: boolean;
   snap: boolean;
   contextMenu: { x: number; y: number } | null;
+  figureOpen: boolean;
+  /** Canvas preview of how the page looks with a colour-vision deficiency. */
+  colorVision: ColorVision;
 }
 
 function load<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
@@ -109,6 +113,8 @@ export const ui = createStore<UiState>({
   dockOpen: load('quillon:dock', ['open', 'closed'], 'open') === 'open',
   snap: load('quillon:snap', ['on', 'off'], 'off') === 'on',
   contextMenu: null,
+  figureOpen: false,
+  colorVision: 'normal',
 });
 
 export function useUi<T>(select: (s: UiState) => T): T {

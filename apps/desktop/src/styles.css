@@ -679,3 +679,88 @@ input.text-field { height: 26px; }
 .about-head img { width: 52px; height: 52px; border-radius: 12px; }
 .about-head h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
 .about-head p { margin: 2px 0 0; color: var(--muted); }
+
+/* ---------------------------------------------------------------- images (0.4) */
+.img-meta { display: grid; gap: 2px; margin: 0 0 8px; }
+.img-name { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.crop-grid .num-label { flex: none; width: 50px; white-space: nowrap; }
+.slider-row .insp-ctl { gap: 8px; }
+.slider-row.disabled { opacity: 0.45; }
+.range {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  margin: 0;
+  border-radius: 999px;
+  appearance: none;
+  background: linear-gradient(90deg, var(--accent) var(--fill, 50%), var(--border) var(--fill, 50%));
+  cursor: pointer;
+}
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(21, 29, 48, 0.2);
+}
+.range::-moz-range-thumb { width: 12px; height: 12px; border: 2px solid var(--accent); border-radius: 50%; background: #fff; }
+.range:disabled { cursor: default; }
+.range-val { width: 38px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+
+/* ---------------------------------------------------------------- figure layout + export size */
+.modal-note { margin: 0 0 12px; color: var(--muted); }
+.modal-note.muted { margin: 10px 0 0; color: var(--faint); font-size: 11.5px; }
+.figure-preview {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.figure-cell {
+  position: relative;
+  height: 64px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(135deg, #e9e7e1 0 6px, #f1efea 6px 12px);
+  border: 1px solid var(--border-strong);
+}
+.figure-cell b { position: absolute; top: 3px; left: 5px; font-size: 11px; color: var(--ink); }
+.export-size {
+  display: grid;
+  gap: 3px;
+  margin-top: 14px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.export-size b { color: var(--text); font-weight: 600; }
+.export-size .warn { color: var(--warn); }
+
+/* ---------------------------------------------------------------- colour vision chip */
+.cvd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 2px 0 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+.cvd-chip.warn { background: #fdf3e1; color: var(--warn); }
+.cvd-swatches { display: inline-flex; gap: 4px; margin-left: 2px; }
+.cvd-pair { display: inline-flex; }
+.cvd-pair i { width: 9px; height: 9px; border: 1px solid rgba(0, 0, 0, 0.15); }
+.cvd-pair i:first-child { border-radius: 2px 0 0 2px; }
+.cvd-pair i:last-child { border-radius: 0 2px 2px 0; border-left: 0; }
+.cvd-x { display: inline-grid; place-items: center; width: 16px; height: 16px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; }
+.cvd-x:hover { background: rgba(0, 0, 0, 0.08); }
+.node-image .hit { fill: transparent; }

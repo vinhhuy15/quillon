@@ -7,3 +7,6 @@ export * from './plot';
 export * from './lines';
 export * from './scene';
 export * from './tikz';
+export * from './image';
+export * from './composer';
+export * from './cvd';

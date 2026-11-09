@@ -319,7 +319,7 @@ describe('documents v2', () => {
   it('migrates v1 files and validates new node types', () => {
     const v1 = { schema: 'quillon/document', version: 1, nodes: [{ type: 'math', id: 'm', latex: 'x', x: 1, y: 2 }] };
     const d = parseDocument(v1);
-    expect(d.version).toBe(2);
+    expect(d.version).toBe(3);
     expect(d.nodes[0].type).toBe('math');
     const v2 = parseDocument({
       schema: 'quillon/document',

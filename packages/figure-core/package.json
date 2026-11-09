@@ -1,6 +1,6 @@
 {
   "name": "@quillon/figure-core",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@quillon/doc-model": "0.3.0",
-    "@quillon/math-core": "0.3.0"
+    "@quillon/doc-model": "0.4.0",
+    "@quillon/math-core": "0.4.0"
   }
 }

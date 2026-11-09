@@ -1,6 +1,6 @@
 [package]
 name = "quillon"
-version = "0.3.0"
+version = "0.4.0"
 description = "Quillon — open-source toolkit for math and scientific figures"
 authors = ["Quillon contributors"]
 license = "Apache-2.0"

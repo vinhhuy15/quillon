@@ -17,7 +17,7 @@ import {
   type ShapeNode,
   type TextNode,
 } from '@quillon/doc-model';
-import { layoutNode, nodeGroup, rotatePoint, type NodeLayout } from '@quillon/figure-core';
+import { cvdFilterValues, layoutNode, nodeGroup, rotatePoint, type NodeLayout } from '@quillon/figure-core';
 import {
   addLine,
   addMath,
@@ -83,7 +83,7 @@ const NodeView = memo(function NodeView({ node, layout, selected }: { node: SciN
 /** The editable box of a node (rotation only for shapes and symbols). */
 function boxOf(n: SciNode, l: NodeLayout): Box | null {
   if (n.type === 'shape' || n.type === 'symbol') return { x: n.x, y: n.y, w: n.width, h: n.height, rot: n.rotation };
-  if (n.type === 'plot') return { x: n.x, y: n.y, w: n.width, h: n.height, rot: 0 };
+  if (n.type === 'plot' || n.type === 'image') return { x: n.x, y: n.y, w: n.width, h: n.height, rot: 0 };
   if (n.type === 'math' || n.type === 'text') return { x: n.x, y: n.y, w: l.width, h: l.height, rot: 0 };
   return null;
 }
@@ -143,6 +143,7 @@ function constrainAngle(p0: Point, p: Point): Point {
 export function Canvas() {
   const { doc, selection } = useEditor();
   const zoom = useUi((s) => s.zoom);
+  const cvd = cvdFilterValues(useUi((s) => s.colorVision));
   const panX = useUi((s) => s.panX);
   const panY = useUi((s) => s.panY);
   const tool = useUi((s) => s.tool);
@@ -349,7 +350,7 @@ export function Canvas() {
     }
     if (d.kind === 'resize') {
       const s = d.start;
-      const keep = e.shiftKey || ((s.type === 'symbol' || s.type === 'math' || s.type === 'text') && d.handle.length === 2);
+      const keep = e.shiftKey || ((s.type === 'symbol' || s.type === 'math' || s.type === 'text' || s.type === 'image') && d.handle.length === 2);
       const nb = resizeBox(d.box, d.handle, { x: p.x - d.p0.x, y: p.y - d.p0.y }, keep);
       let patch: NodePatch;
       if (s.type === 'math' || s.type === 'text') {
@@ -503,10 +504,19 @@ export function Canvas() {
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
       >
+        {cvd && (
+          <defs>
+            <filter id="cvd-sim" colorInterpolationFilters="linearRGB">
+              <feColorMatrix type="matrix" values={cvd} />
+            </filter>
+          </defs>
+        )}
         <g transform={`translate(${panX} ${panY}) scale(${zoom})`}>
-          {doc.nodes.map((n) => (
-            <NodeView key={n.id} node={n} layout={getLayout(n, numbers)} selected={selSet.has(n.id)} />
-          ))}
+          <g filter={cvd ? 'url(#cvd-sim)' : undefined}>
+            {doc.nodes.map((n) => (
+              <NodeView key={n.id} node={n} layout={getLayout(n, numbers)} selected={selSet.has(n.id)} />
+            ))}
+          </g>
 
           {/* selection outlines */}
           {doc.nodes
@@ -571,7 +581,7 @@ function Handles({ node, layout, px }: { node: SciNode; layout: NodeLayout; px: 
   const b = boxOf(node, layout);
   if (!b) return null;
   const canRotate = node.type === 'shape' || node.type === 'symbol';
-  const corners = node.type === 'math' || node.type === 'text';
+  const corners = node.type === 'math' || node.type === 'text' || node.type === 'image';
   const s = 7 * px;
   const pos: Record<Handle, Point> = {
     nw: { x: 0, y: 0 }, n: { x: b.w / 2, y: 0 }, ne: { x: b.w, y: 0 }, e: { x: b.w, y: b.h / 2 },

@@ -1,5 +1,5 @@
 import { equationNumbers, type NodeId, type Rect, type SciDocument, type SciNode } from '@quillon/doc-model';
-import { attachGeometry, layoutNode, resolveConnectors, type NodeLayout, type TextMeasurer } from '@quillon/figure-core';
+import { attachGeometry, layoutNode, resolveConnectors, resolveInsets, type NodeLayout, type TextMeasurer } from '@quillon/figure-core';
 import { editor } from './state/store';
 
 let ctx: CanvasRenderingContext2D | null = null;
@@ -41,5 +41,8 @@ export function attachOf(n: SciNode, doc: SciDocument) {
   return attachGeometry(n, getLayout(n, getNumbers(doc)));
 }
 
-// Keep connectors glued to the nodes they attach to after every edit.
-editor.setNormalizer((doc) => resolveConnectors(doc, (n) => attachOf(n, doc)));
+// After every edit: keep inset markers on their regions, then connectors glued to the nodes they attach to.
+editor.setNormalizer((doc) => {
+  const d = resolveInsets(doc);
+  return resolveConnectors(d, (n) => attachOf(n, d));
+});

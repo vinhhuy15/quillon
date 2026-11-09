@@ -162,5 +162,6 @@ export const FILTERS = {
     mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   },
   tex: { name: 'LaTeX', extensions: ['tex'], mime: 'application/x-tex' },
+  image: { name: 'Image', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg', 'avif'], mime: 'image/*' },
   html: { name: 'HTML', extensions: ['html'], mime: 'text/html' },
 } satisfies Record<string, FileFilter>;

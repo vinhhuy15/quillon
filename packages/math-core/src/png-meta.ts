@@ -111,3 +111,40 @@ export function getPngTexts(png: Uint8Array): Record<string, string> {
   }
   return out;
 }
+
+/** Set the physical resolution (pHYs chunk) so Word, Illustrator and journals size the image correctly. */
+export function setPngDpi(png: Uint8Array, dpi: number): Uint8Array {
+  const ppm = Math.round(dpi / 0.0254);
+  const typeAndData = new Uint8Array(4 + 9);
+  typeAndData.set([0x70, 0x48, 0x59, 0x73], 0); // "pHYs"
+  const dv = new DataView(typeAndData.buffer);
+  dv.setUint32(4, ppm);
+  dv.setUint32(8, ppm);
+  typeAndData[12] = 1; // unit: metre
+  const chunk = new Uint8Array(12 + 9);
+  const cv = new DataView(chunk.buffer);
+  cv.setUint32(0, 9);
+  chunk.set(typeAndData, 4);
+  cv.setUint32(17, crc32(typeAndData));
+  const list = chunks(png).filter((c) => c.type !== 'pHYs');
+  const parts: Uint8Array[] = [png.subarray(0, 8)];
+  for (const c of list) {
+    parts.push(png.subarray(c.start, c.dataStart + c.length + 4));
+    if (c.type === 'IHDR') parts.push(chunk);
+  }
+  const out = new Uint8Array(parts.reduce((s, p) => s + p.length, 0));
+  let o = 0;
+  for (const p of parts) {
+    out.set(p, o);
+    o += p.length;
+  }
+  return out;
+}
+
+/** DPI from a PNG's pHYs chunk, or null. */
+export function getPngDpi(png: Uint8Array): number | null {
+  const c = chunks(png).find((x) => x.type === 'pHYs');
+  if (!c || c.length < 9) return null;
+  const dv = new DataView(png.buffer, png.byteOffset + c.dataStart, 9);
+  return dv.getUint8(8) === 1 ? Math.round(dv.getUint32(0) * 0.0254) : null;
+}

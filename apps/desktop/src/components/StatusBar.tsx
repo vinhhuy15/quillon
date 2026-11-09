@@ -1,5 +1,6 @@
+import { confusablePairs, figureColors } from '@quillon/figure-core';
 import { zoomAt, zoomFit, zoomReset } from '../actions';
-import { useT } from '../i18n';
+import { useT, type StringKey } from '../i18n';
 import { isDesktop } from '../platform';
 import { persist, ui, useEditor, useUi } from '../state/store';
 import { toolHint } from '../tools';
@@ -11,10 +12,31 @@ export function StatusBar() {
   const zoom = useUi((s) => s.zoom);
   const tool = useUi((s) => s.tool);
   const snap = useUi((s) => s.snap);
+  const cvd = useUi((s) => s.colorVision);
+  const pairs = cvd === 'normal' ? [] : confusablePairs(figureColors(doc.nodes), cvd);
   return (
     <footer className="statusbar">
       <span className="status-hint">{t(toolHint(tool))}</span>
       <span className="spacer" />
+      {cvd !== 'normal' && (
+        <span className={`cvd-chip${pairs.length ? ' warn' : ''}`} title={pairs.map((p) => p.join(' ≈ ')).join('\n')}>
+          <Icon name="eye" size={13} />
+          {t(`cvd_${cvd}` as StringKey)} · {pairs.length ? `${pairs.length} ${t('cvdConflicts')}` : t('cvdOk')}
+          {pairs.length > 0 && (
+            <span className="cvd-swatches">
+              {pairs.slice(0, 3).map(([a, b]) => (
+                <span key={a + b} className="cvd-pair">
+                  <i style={{ background: a }} />
+                  <i style={{ background: b }} />
+                </span>
+              ))}
+            </span>
+          )}
+          <button className="cvd-x" title={t('cvdStop')} onClick={() => ui.set({ colorVision: 'normal' })}>
+            <Icon name="close" size={12} />
+          </button>
+        </span>
+      )}
       <span>
         {doc.nodes.length} {t('objects')}
         {selection.length > 0 && ` · ${selection.length} ${t('selected')}`}
@@ -44,7 +66,7 @@ export function StatusBar() {
           <Icon name="fit" size={14} />
         </button>
       </span>
-      <span className="muted">{isDesktop ? 'Desktop' : 'Web'} · v0.3.0</span>
+      <span className="muted">{isDesktop ? 'Desktop' : 'Web'} · v0.4.0</span>
     </footer>
   );
 }

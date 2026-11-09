@@ -11,6 +11,8 @@ import {
   normalizeLatex,
   parseXml,
   setPngText,
+  setPngDpi,
+  getPngDpi,
   validateLatex,
   wordClipboardHtml,
 } from '../src';
@@ -174,5 +176,17 @@ describe('scene + exports', () => {
     expect(html).toContain('<!--[if gte msEquation 12]><m:oMathPara><m:oMath>');
     expect(html).toContain(`<span style='font-family:"Cambria Math"'><m:r>x</m:r></span>`);
     expect(html).not.toContain('<m:t>');
+  });
+});
+
+describe('PNG resolution', () => {
+  it('writes and replaces the pHYs chunk', () => {
+    const png = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0));
+    expect(getPngDpi(png)).toBeNull();
+    const a = setPngDpi(png, 300);
+    expect(getPngDpi(a)).toBe(300);
+    const b = setPngDpi(setPngText(a, 'k', 'v'), 600);
+    expect(getPngDpi(b)).toBe(600);
+    expect(b.length).toBe(setPngText(a, 'k', 'v').length);
   });
 });

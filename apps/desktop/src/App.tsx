@@ -6,6 +6,7 @@ import {
   duplicateSelection,
   fileNew,
   fileOpen,
+  insertImage,
   fileSave,
   groupSelection,
   nudge,
@@ -23,7 +24,7 @@ import {
 } from './actions';
 import { Canvas, isTyping } from './components/Canvas';
 import { ContextMenu } from './components/ContextMenu';
-import { AboutDialog, ExportDialog, Toasts } from './components/Dialogs';
+import { AboutDialog, ExportDialog, FigureDialog, Toasts } from './components/Dialogs';
 import { EquationEditor } from './components/EquationEditor';
 import { InsertPanel } from './components/InsertPanel';
 import { Inspector } from './components/Inspector';
@@ -104,6 +105,7 @@ export function App() {
       </div>
       <StatusBar />
       <ExportDialog />
+      <FigureDialog />
       <AboutDialog />
       <ContextMenu />
       <Toasts />
@@ -145,7 +147,7 @@ function onKeyDown(e: KeyboardEvent) {
     ui.set({ aboutOpen: true });
     return;
   }
-  if (isTyping(e.target) || ui.get().exportOpen || ui.get().aboutOpen) return;
+  if (isTyping(e.target) || ui.get().exportOpen || ui.get().aboutOpen || ui.get().figureOpen) return;
 
   const handled = () => e.preventDefault();
   if (mod) {
@@ -156,6 +158,7 @@ function onKeyDown(e: KeyboardEvent) {
     if (key === 'n') return handled(), fileNew();
     if (key === 'g') return handled(), e.shiftKey ? ungroupSelection() : groupSelection();
     if (key === 'r') return handled(), rotateSelection(90);
+    if (key === 'l' && e.shiftKey) return handled(), editor.selection.length >= 2 && ui.set({ figureOpen: true });
     if (key === 'l') return handled(), toggleLock();
     if (key === 'c' && e.shiftKey) return handled(), copyForWord();
     if (key === '=' || key === '+') return handled(), zoomAt(1.2);
@@ -197,6 +200,7 @@ function onKeyDown(e: KeyboardEvent) {
       return;
     }
   }
+  if (key === 'i' && !e.shiftKey) return handled(), insertImage();
   const tool = toolDefs.find((d) => d.key.toLowerCase() === key);
   if (tool && !e.shiftKey) {
     handled();

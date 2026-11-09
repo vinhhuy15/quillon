@@ -5,7 +5,7 @@
 import type { NodeId, NodePatch, SciDocument, SciNode } from './types';
 
 /** Optional fields a patch may add to (or, with `undefined`, remove from) any node. */
-const OPTIONAL_KEYS = new Set(['locked', 'group', 'start', 'end', 'label', 'labelSize', 'flip', 'align']);
+const OPTIONAL_KEYS = new Set(['locked', 'group', 'start', 'end', 'label', 'labelSize', 'flip', 'align', 'panelLabel', 'name', 'crop', 'grayscale', 'invert', 'scaleBar', 'inset']);
 
 function touch(doc: SciDocument, nodes: SciNode[]): SciDocument {
   return { ...doc, nodes, meta: { ...doc.meta, modified: new Date().toISOString() } };

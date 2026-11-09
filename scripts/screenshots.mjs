@@ -1,13 +1,15 @@
 // Captures the README screenshots from the running dev server (npm run dev) with headless Chrome.
-// Usage: node scripts/screenshots.mjs [chromePath]
+// Usage: node scripts/screenshots.mjs [chromePath]   (SHOTS=figures,export to capture only some, OUT_DIR to write elsewhere)
 import { spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const CHROME = process.argv[2] ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const URL = 'http://localhost:1420/';
-const OUT = new globalThis.URL('../docs/images/', import.meta.url);
+const OUT = process.env.OUT_DIR ? pathToFileURL(process.env.OUT_DIR.replace(/[\\/]?$/, '/')) : new globalThis.URL('../docs/images/', import.meta.url);
+const ONLY = process.env.SHOTS ? new Set(process.env.SHOTS.split(',')) : null;
 mkdirSync(OUT, { recursive: true });
 
 const port = 9333;
@@ -48,6 +50,7 @@ const run = async (code) => {
 };
 
 async function shot(name, width, height, setup) {
+  if (ONLY && !ONLY.has(name)) return;
   await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: URL });
   await sleep(2500);
@@ -190,11 +193,63 @@ A.zoomFit();
 await settle();
 `);
 
+// A synthetic fluorescence micrograph, drawn in the page so the README needs no binary sample.
+const FIGURE = `
+fresh('Cell imaging');
+ui.set({ panelOpen: false, dockOpen: false });
+const c = document.createElement('canvas'); c.width = 800; c.height = 600;
+const g = c.getContext('2d'); g.fillStyle = '#05070d'; g.fillRect(0, 0, 800, 600);
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for (let i = 0; i < 70; i++) {
+  const x = rnd() * 800, y = rnd() * 600, r = 12 + rnd() * 30, green = i % 3;
+  const gr = g.createRadialGradient(x, y, 1, x, y, r);
+  gr.addColorStop(0, green ? 'rgba(80,255,140,0.95)' : 'rgba(255,60,90,0.95)');
+  gr.addColorStop(0.6, green ? 'rgba(30,140,70,0.5)' : 'rgba(150,20,50,0.5)');
+  gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+}
+const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+const img = await A.addImageBytes('cells.png', new Uint8Array(await blob.arrayBuffer()), { x: 260, y: 200 });
+place(img, { scaleBar: D.createScaleBar({ unitsPerPixel: 0.25, length: 50 }) });
+A.createInset(editor.doc.nodes.find((n) => n.id === img.id));
+A.addPlot({ x: 60, y: 560, width: 300, height: 300 });
+const plot = last();
+place(plot, { axes: 'box', xMin: 0, xMax: 10, yMin: 0, yMax: 1.1, xLabel: 'Time (min)', yLabel: 'Intensity', legend: true, functions: [
+  D.createPlotFunction({ expr: '1 - exp(-x/2)', color: '#d62728', label: 'GFP' }),
+  D.createPlotFunction({ expr: 'exp(-x/3)', color: '#2ca02c', label: 'RFP' }),
+] });
+editor.selectAll();
+A.composeFigure({ columns: 3, gap: 16, equalWidth: false, labels: 'a', labelSize: 18 });
+editor.select([editor.doc.nodes.find((n) => n.type === 'image' && n.inset).id]);
+ui.set({ activeMathId: null });
+await settle();
+A.zoomFit();
+await settle();
+`;
+
+await shot('figures', 1440, 900, FIGURE);
+
+await shot('colorblind', 1440, 900, FIGURE + `
+editor.select([]);
+ui.set({ colorVision: 'deuteranopia' });
+await settle();
+`);
+
+await shot('figure-layout', 1440, 900, FIGURE + `
+editor.selectAll();
+ui.set({ figureOpen: true });
+await settle();
+`);
+
 await shot('export', 1440, 900, RC + `
 editor.select([]);
 ui.set({ exportOpen: true });
 await settle();
-document.querySelectorAll('.format-card')[3].click();
+document.querySelectorAll('.format-card')[0].click();
+await settle();
+const sizeSel = [...document.querySelectorAll('.modal select')][0];
+Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sizeSel, 'nature-2');
+sizeSel.dispatchEvent(new Event('change', { bubbles: true }));
 `);
 
 // The RC page exported as TikZ, for the README (compiled separately with pdflatex).

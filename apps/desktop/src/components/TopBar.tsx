@@ -8,6 +8,7 @@ import {
   copySvg,
   copyTikz,
   deleteSelection,
+  insertImage,
   distribute,
   duplicateSelection,
   fileNew,
@@ -23,7 +24,8 @@ import {
   zoomFit,
   zoomReset,
 } from '../actions';
-import { setLang, useT } from '../i18n';
+import { COLOR_VISIONS } from '@quillon/figure-core';
+import { setLang, useT, type StringKey } from '../i18n';
 import { editor, persist, ui, useEditor, useUi } from '../state/store';
 import { setTool, toolDefs } from '../tools';
 import { Icon } from './Icons';
@@ -72,6 +74,7 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
   const panelOpen = useUi((s) => s.panelOpen);
   const dockOpen = useUi((s) => s.dockOpen);
   const lang = useUi((s) => s.lang);
+  const colorVision = useUi((s) => s.colorVision);
   const sel = doc.nodes.filter((n) => selection.includes(n.id));
   const has = sel.length > 0;
   const hasMath = sel.some((n) => n.type === 'math');
@@ -116,6 +119,7 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
         ...toolDefs
           .filter((d) => d.id !== 'select' && d.id !== 'hand')
           .map((d) => ({ label: t(d.label), kbd: d.key, onClick: () => setTool(d.id) })),
+        { label: t('insertImage'), kbd: 'I', onClick: insertImage },
         'sep' as const,
         { label: t('templates'), onClick: () => ui.set({ panelOpen: true, panelTab: 'templates' }) },
         { label: t('shapesSymbols'), onClick: () => ui.set({ panelOpen: true, panelTab: 'shapes' }) },
@@ -138,6 +142,7 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
         { label: t('alignBottom'), onClick: () => align('bottom'), disabled: sel.length < 2 },
         { label: t('distributeH'), onClick: () => distribute('h'), disabled: sel.length < 3 },
         { label: t('distributeV'), onClick: () => distribute('v'), disabled: sel.length < 3 },
+        { label: t('figureLayout'), kbd: 'Ctrl+Shift+L', onClick: () => ui.set({ figureOpen: true }), disabled: sel.length < 2 },
         'sep',
         { label: t('group'), kbd: 'Ctrl+G', onClick: groupSelection, disabled: sel.length < 2 },
         { label: t('ungroup'), kbd: 'Ctrl+Shift+G', onClick: ungroupSelection, disabled: !sel.some((n) => n.group) },
@@ -166,6 +171,8 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
         },
         { label: t('insertPanel'), kbd: 'Ctrl+\\', checked: panelOpen, onClick: togglePanel },
         { label: t('equationEditor'), kbd: 'Ctrl+J', checked: dockOpen, onClick: toggleDock },
+        'sep',
+        ...COLOR_VISIONS.map((v) => ({ label: t(`cvd_${v}` as StringKey), checked: colorVision === v, onClick: () => ui.set({ colorVision: v }) })),
         'sep',
         { label: 'English', checked: lang === 'en', onClick: () => setLang('en') },
         { label: 'Tiếng Việt', checked: lang === 'vi', onClick: () => setLang('vi') },

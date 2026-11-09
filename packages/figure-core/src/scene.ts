@@ -6,6 +6,7 @@ import type { MathNode, NodeId, Point, Rect, SciNode, SymbolNode } from '@quillo
 import { escapeXml, layoutMath, makeSource, SOURCE_NS, type MathSource } from '@quillon/math-core';
 import { boundsOf, fmt, inflate, rectPolygon, rotatedBounds, rotatePoint } from './geom';
 import { lineGeometry, lineStrokeMarkup, type AttachGeometry } from './lines';
+import { imageMarkup } from './image';
 import { plotMarkup } from './plot';
 import { fontString, layoutRich, type TextMeasurer } from './richtext';
 import { shapeElement, shapePolygon, strokeAttrs } from './shapes';
@@ -142,6 +143,8 @@ export function layoutNode(n: SciNode, ctx: LayoutContext = {}): NodeLayout {
       const p = plotMarkup(n, measure);
       return { ...boxLayout(n, n.width, n.height, 0, p.markup), error: p.errors[0] };
     }
+    case 'image':
+      return boxLayout(n, n.width, n.height, 0, imageMarkup(n));
     case 'line': {
       const g = lineGeometry(n);
       let overlay = '';

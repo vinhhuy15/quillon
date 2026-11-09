@@ -23,6 +23,26 @@ const P: Record<string, ReactNode> = {
       <path d="M4 11c1.5-6 3-7 4.5-4s3 2.5 4.5-3" />
     </>
   ),
+  image: (
+    <>
+      <rect x="2" y="3" width="12" height="10" rx="1" />
+      <circle cx="5.8" cy="6.3" r="1.2" />
+      <path d="m2.5 12 3.6-3.6 2.4 2.4 2-2L14 12.4" strokeLinejoin="round" />
+    </>
+  ),
+  layout: (
+    <>
+      <rect x="2" y="2" width="5" height="5" rx="0.6" />
+      <rect x="9" y="2" width="5" height="5" rx="0.6" />
+      <rect x="2" y="9" width="12" height="5" rx="0.6" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" strokeLinejoin="round" />
+      <circle cx="8" cy="8" r="2.2" />
+    </>
+  ),
   shapes: (
     <>
       <rect x="2" y="2" width="6" height="6" rx="0.5" />

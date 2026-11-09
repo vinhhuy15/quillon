@@ -4,6 +4,7 @@
 import {
   addNodes,
   createDocument,
+  createImageNode,
   createLineNode,
   createMathNode,
   createPlotNode,
@@ -22,6 +23,8 @@ import {
   reorderNodes,
   ungroupNodes,
   updateNodes,
+  type ImageCrop,
+  type ImageNode,
   type LineNode,
   type MathNode,
   type NodePatch,
@@ -42,6 +45,7 @@ import {
   normalizeLatex,
   parseSource,
   readSvgSource,
+  setPngDpi,
   setPngText,
   SOURCE_KEY,
   LEGACY_SOURCE_KEYS,
@@ -50,13 +54,31 @@ import {
   type DocxBlock,
   type MathSource,
 } from '@quillon/math-core';
-import { boundsOf, getSymbol, inflate, isBlankNode, mathToSvg, rectPolygon, richToLatex, sceneToSvg, sceneToTikz } from '@quillon/figure-core';
+import {
+  boundsOf,
+  cropOf,
+  fitSize,
+  getSymbol,
+  gridPositions,
+  inflate,
+  isBlankNode,
+  mathToSvg,
+  panelLabel,
+  readingOrderBoxes,
+  rectPolygon,
+  scaleBarGeometry,
+  richToLatex,
+  sceneToSvg,
+  sceneToTikz,
+  sizeForCrop,
+  type PanelLabelStyle,
+} from '@quillon/figure-core';
 import { t } from './i18n';
 import { getNumbers, measureText, nodeBounds } from './layout';
 import { FILTERS, openFile, saveFile, type FileFilter } from './platform';
 import { editor, toast, ui } from './state/store';
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
 // ------------------------------------------------------------------ viewport
 
@@ -342,6 +364,11 @@ function cloneNodes(nodes: SciNode[], dx: number, dy: number): SciNode[] {
       if (!groups.has(n.group)) groups.set(n.group, newId('g'));
       copy.group = groups.get(n.group);
     }
+    if (copy.type === 'image' && n.type === 'image' && n.inset) {
+      // An inset copied without its marker becomes a plain cropped image.
+      if (n.inset.marker && ids.has(n.inset.marker)) copy.inset = { source: ids.get(n.inset.source) ?? n.inset.source, marker: ids.get(n.inset.marker)! };
+      else delete copy.inset;
+    }
     if (copy.type === 'line' && n.type === 'line') {
       if (n.start) n.start.node && ids.has(n.start.node) ? (copy.start = { ...n.start, node: ids.get(n.start.node)! }) : delete copy.start;
       if (n.end) n.end.node && ids.has(n.end.node) ? (copy.end = { ...n.end, node: ids.get(n.end.node)! }) : delete copy.end;
@@ -391,7 +418,7 @@ export function onCopyEvent(e: ClipboardEvent, cut: boolean) {
 export async function onPasteEvent(e: ClipboardEvent) {
   const data = e.clipboardData;
   if (!data) return;
-  const file = [...data.files].find((f) => f.type === 'image/png' || f.type === 'image/svg+xml');
+  const file = [...data.files].find((f) => f.type.startsWith('image/'));
   const text = data.getData('text/plain');
   e.preventDefault();
   if (file) {
@@ -497,6 +524,194 @@ export async function copyImage(msg?: string) {
   }
 }
 
+// ------------------------------------------------------------------ images
+
+const IMAGE_TYPES: Record<string, string> = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp', svg: 'image/svg+xml', avif: 'image/avif',
+};
+
+/** Image MIME type from the file's magic bytes, falling back to its extension. */
+export function imageType(name: string, b: Uint8Array): string | null {
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return 'image/gif';
+  if (b[0] === 0x42 && b[1] === 0x4d) return 'image/bmp';
+  if (b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'image/webp';
+  const ext = name.toLowerCase().split('.').pop() ?? '';
+  return IMAGE_TYPES[ext] ?? null;
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+function decodeImage(src: string): Promise<{ width: number; height: number }> {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res({ width: img.naturalWidth || 300, height: img.naturalHeight || 150 });
+    img.onerror = () => rej(new Error(t('imageUnreadable')));
+    img.src = src;
+  });
+}
+
+/** Insert image bytes as an image node, fitted into half the view and never upscaled. */
+export async function addImageBytes(name: string, bytes: Uint8Array, at?: Point): Promise<ImageNode | null> {
+  const type = imageType(name, bytes);
+  if (!type) {
+    toast(t('imageUnsupported'), 'error');
+    return null;
+  }
+  try {
+    const src = `data:${type};base64,${toBase64(bytes)}`;
+    const nat = await decodeImage(src);
+    const z = ui.get().zoom;
+    const size = fitSize(nat.width, nat.height, Math.max(240, (viewport.width * 0.5) / z), Math.max(180, (viewport.height * 0.5) / z));
+    const c = at ?? viewCenter();
+    const p = at ? { x: c.x - size.width / 2, y: c.y - size.height / 2 } : freeSpot({ x: c.x - size.width / 2, y: c.y - size.height / 2 });
+    const node = createImageNode({ src, name, naturalWidth: nat.width, naturalHeight: nat.height, ...size, x: Math.round(p.x), y: Math.round(p.y) });
+    insert('Add image', [node]);
+    if (bytes.length > 8 * 1024 * 1024) toast(t('imageLarge'), 'info', 5000);
+    return node;
+  } catch (e) {
+    toast(errorText(e), 'error');
+    return null;
+  }
+}
+
+export async function insertImage() {
+  try {
+    const f = await openFile([FILTERS.image]);
+    if (f) await addImageBytes(f.name, f.bytes);
+  } catch (e) {
+    toast(`${t('openFailed')}: ${errorText(e)}`, 'error');
+  }
+}
+
+/** Crop an image to a new region, keeping its zoom and top-left corner. */
+export function setImageCrop(n: ImageNode, crop: ImageCrop, coalesce?: string) {
+  const size = sizeForCrop(n, crop);
+  const full = crop.x <= 0 && crop.y <= 0 && crop.width >= 1 && crop.height >= 1;
+  patchNodes('Crop', { [n.id]: { crop: full ? undefined : crop, width: size.width, height: size.height } }, coalesce);
+}
+
+/** 1, 2 or 5 times a power of ten, close to `v`. */
+export function niceLength(v: number): number {
+  if (!(v > 0)) return 1;
+  const p = 10 ** Math.floor(Math.log10(v));
+  const m = v / p;
+  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
+}
+
+/**
+ * Inset: a 2× magnified copy of the centre of the image, placed to its right, with a dashed
+ * marker on the source that follows the inset's crop.
+ */
+export function createInset(n: ImageNode) {
+  const sc = cropOf(n);
+  const crop: ImageCrop = { x: sc.x + sc.width * 0.375, y: sc.y + sc.height * 0.375, width: sc.width * 0.25, height: sc.height * 0.25 };
+  const color = '#f59e0b';
+  const marker = createShapeNode({ x: n.x, y: n.y, width: 1, height: 1, stroke: color, strokeWidth: 1.5, dash: 'dashed' });
+  const inset = createImageNode({
+    src: n.src,
+    name: n.name,
+    naturalWidth: n.naturalWidth,
+    naturalHeight: n.naturalHeight,
+    brightness: n.brightness,
+    contrast: n.contrast,
+    saturation: n.saturation,
+    grayscale: n.grayscale,
+    invert: n.invert,
+    // Same calibration, shorter bar: the inset shows a quarter of the width.
+    scaleBar: n.scaleBar && { ...n.scaleBar, length: niceLength((crop.width * n.naturalWidth * n.scaleBar.unitsPerPixel) / 4) },
+    x: Math.round(n.x + n.width + 24),
+    y: Math.round(n.y),
+    crop,
+    width: Math.round(n.width * 0.5),
+    height: Math.round(n.height * 0.5),
+    border: color,
+    borderWidth: 2,
+    inset: { source: n.id, marker: marker.id },
+  });
+  insert('Create inset', [marker, inset]);
+  editor.select([inset.id]);
+}
+
+// ------------------------------------------------------------------ figure composer
+
+export interface FigureLayout {
+  columns: number;
+  gap: number;
+  /** Scale single panels that can be resized (images, plots, shapes, symbols) to the same width. */
+  equalWidth: boolean;
+  labels: PanelLabelStyle | null;
+  labelSize: number;
+}
+
+const resizable = (n: SciNode): n is Extract<SciNode, { type: 'image' | 'plot' | 'shape' | 'symbol' }> =>
+  n.type === 'image' || n.type === 'plot' || n.type === 'shape' || n.type === 'symbol';
+
+/** Panels of the current selection in reading order (a group counts as one panel). */
+export function selectionPanels() {
+  // Inset markers ride along with their source image, and panel labels are rebuilt: neither is a panel.
+  const markers = new Set(editor.doc.nodes.flatMap((n) => (n.type === 'image' && n.inset?.marker ? [n.inset.marker] : [])));
+  const sel = expandGroups(editor.doc, editor.selection);
+  const nodes = editor.doc.nodes.filter((n) => sel.includes(n.id) && !n.locked && !markers.has(n.id) && !(n.type === 'text' && n.panelLabel));
+  return readingOrderBoxes(unitsOf(nodes));
+}
+
+/**
+ * Arrange the selection as a multi-panel figure: equal widths, a grid, and panel labels.
+ * Each label is grouped with its panel so they move together; applying again replaces the labels.
+ */
+export function composeFigure(opts: FigureLayout) {
+  const panels = selectionPanels();
+  if (!panels.length) return;
+  const origin = boundsOf(panels.flatMap((p) => rectPolygon(p.box)));
+  const color = editor.doc.settings.defaultColor;
+  const sel = new Set(expandGroups(editor.doc, editor.selection));
+  const oldLabels = editor.doc.nodes.filter((n) => sel.has(n.id) && n.type === 'text' && n.panelLabel).map((n) => n.id);
+  editor.seal();
+  editor.apply('Figure layout', (d) => {
+    let next = removeNodes(d, oldLabels);
+    if (opts.equalWidth) {
+      const target = Math.max(...panels.map((p) => p.box.width));
+      const patches: Record<string, NodePatch> = {};
+      for (const p of panels) {
+        if (p.ids.length !== 1) continue;
+        const n = next.nodes.find((x) => x.id === p.ids[0]);
+        if (!n || !resizable(n) || p.box.width <= 0) continue;
+        const k = target / p.box.width;
+        patches[n.id] = { width: Math.round(n.width * k), height: Math.round(n.height * k) };
+      }
+      next = updateNodes(next, patches);
+    }
+    const boxOfPanel = (ids: string[], doc: SciDocument) =>
+      boundsOf(ids.flatMap((id) => rectPolygon(nodeBounds(doc.nodes.find((x) => x.id === id)!, doc))));
+    const boxes = panels.map((p) => boxOfPanel(p.ids, next));
+    const labelH = opts.labels ? Math.round(opts.labelSize * 1.5) : 0;
+    const pos = gridPositions(boxes, { columns: opts.columns, gap: opts.gap, rowGap: opts.gap + labelH, origin: { x: origin.x, y: origin.y + labelH } });
+    panels.forEach((p, i) => {
+      next = moveNodes(next, p.ids, Math.round(pos[i].x - boxes[i].x), Math.round(pos[i].y - boxes[i].y));
+    });
+    if (opts.labels) {
+      const style = opts.labels;
+      const groups: Record<string, NodePatch> = {};
+      const labels = panels.map((p, i) => {
+        const first = next.nodes.find((x) => x.id === p.ids[0]);
+        const group = first?.group ?? newId('g');
+        for (const id of p.ids) groups[id] = { group };
+        return createTextNode({ x: Math.round(pos[i].x), y: Math.round(pos[i].y - labelH), text: panelLabel(i, style), fontSize: opts.labelSize, bold: true, color, group, panelLabel: true });
+      });
+      next = addNodes(updateNodes(next, groups), labels);
+    }
+    return next;
+  });
+  editor.seal();
+  editor.select(expandGroups(editor.doc, panels.flatMap((p) => p.ids)));
+}
+
 // ------------------------------------------------------------------ files
 
 export function confirmDiscard(): boolean {
@@ -563,14 +778,23 @@ export async function importBytes(name: string, bytes: Uint8Array, at?: Point, p
     const nodesJson = keys.map((k) => texts[`${k}-nodes`]).find(Boolean);
     if (nodesJson) return insertNodesJson(nodesJson, at);
     const src = parseSource(keys.map((k) => texts[k]).find(Boolean));
-    return src ? insertFromSource(src, at) : toast(t('imageNoSource'), 'error');
+    // A picture that Quillon did not make is inserted as an image.
+    if (src) return insertFromSource(src, at);
+    await addImageBytes(name, bytes, at);
+    return;
   }
   if (lower.endsWith('.svg')) {
     const text = new TextDecoder().decode(bytes);
     const nodesMatch = NODES_META.exec(text);
     if (nodesMatch) return insertNodesJson(decodeXmlText(nodesMatch[1]), at);
     const src = readSvgSource(text);
-    return src ? insertFromSource(src, at) : toast(t('imageNoSource'), 'error');
+    if (src) return insertFromSource(src, at);
+    await addImageBytes(name, bytes, at);
+    return;
+  }
+  if (imageType(name, bytes)) {
+    await addImageBytes(name, bytes, at);
+    return;
   }
   if (!confirmDiscard()) return;
   const doc = decodeSci(bytes);
@@ -652,9 +876,52 @@ export async function rasterize(svg: string, width: number, height: number, scal
   }
 }
 
-async function scopePng(nodes: SciNode[], dpi: number, background: string | null): Promise<Uint8Array> {
+/** Physical size of an export: at 96 px per inch, or scaled to a given width in millimetres. */
+export interface ExportSize {
+  widthMm: number;
+  heightMm: number;
+  widthPx: number;
+  heightPx: number;
+  /** Smallest text in the figure at that size, in points (null without text). */
+  minFontPt: number | null;
+}
+
+const PX_MM = 25.4 / 96;
+
+function smallestFontPx(nodes: SciNode[]): number | null {
+  const sizes: number[] = [];
+  for (const n of nodes) {
+    if (n.type === 'math' || n.type === 'text') sizes.push(n.fontSize);
+    else if ((n.type === 'shape' || n.type === 'symbol') && n.label.trim()) sizes.push(n.labelSize);
+    else if (n.type === 'line' && n.label?.trim()) sizes.push(n.labelSize ?? 14);
+    else if (n.type === 'plot') sizes.push(n.fontSize);
+    else if (n.type === 'image' && n.scaleBar?.showLabel) sizes.push(scaleBarGeometry(n, n.scaleBar).fontSize);
+  }
+  return sizes.length ? Math.min(...sizes) : null;
+}
+
+export function exportSize(scope: 'selection' | 'all', widthMm: number | null, dpi: number): ExportSize | null {
+  const nodes = exportable(scope === 'selection' ? selectedNodes() : editor.doc.nodes);
+  const s = scopeSvg(nodes, null);
+  if (!s) return null;
+  const natural = s.width * PX_MM;
+  const k = widthMm ? widthMm / natural : 1;
+  const wMm = natural * k, hMm = s.height * PX_MM * k;
+  const min = smallestFontPx(nodes);
+  return {
+    widthMm: wMm,
+    heightMm: hMm,
+    widthPx: Math.round((wMm / 25.4) * dpi),
+    heightPx: Math.round((hMm / 25.4) * dpi),
+    minFontPt: min === null ? null : min * 0.75 * k,
+  };
+}
+
+async function scopePng(nodes: SciNode[], dpi: number, background: string | null, widthMm: number | null = null): Promise<Uint8Array> {
   const s = scopeSvg(nodes, null)!;
-  let png = await rasterize(s.svg, s.width, s.height, dpi / 96, background);
+  const scale = widthMm ? ((widthMm / 25.4) * dpi) / s.width : dpi / 96;
+  let png = await rasterize(s.svg, s.width, s.height, scale, background);
+  png = setPngDpi(png, dpi);
   const single = nodes.length === 1 && nodes[0].type === 'math' ? nodes[0] : null;
   png = single
     ? setPngText(png, SOURCE_KEY, JSON.stringify(makeSource(single)))
@@ -785,6 +1052,15 @@ export interface ExportRequest {
   scope: 'selection' | 'all';
   dpi: number;
   background: string | null;
+  /** Journal column width for PNG/SVG; null keeps the on-screen size. */
+  widthMm?: number | null;
+}
+
+/** SVG sized in millimetres (the viewBox keeps the drawing itself unchanged). */
+function svgAtWidth(svg: string, width: number, height: number, widthMm: number): string {
+  const hMm = (height / width) * widthMm;
+  const f = (v: number) => Math.round(v * 100) / 100;
+  return svg.replace(/<svg([^>]*?) width="[^"]*" height="[^"]*"/, `<svg$1 width="${f(widthMm)}mm" height="${f(hMm)}mm"`);
 }
 
 export async function exportFile(req: ExportRequest): Promise<boolean> {
@@ -799,13 +1075,16 @@ export async function exportFile(req: ExportRequest): Promise<boolean> {
     const enc = new TextEncoder();
     switch (req.format) {
       case 'png':
-        bytes = await scopePng(nodes, req.dpi, req.background);
+        bytes = await scopePng(nodes, req.dpi, req.background, req.widthMm ?? null);
         break;
-      case 'svg':
-        bytes = enc.encode(scopeSvg(nodes, req.background)!.svg);
+      case 'svg': {
+        const s = scopeSvg(nodes, req.background)!;
+        bytes = enc.encode(req.widthMm ? svgAtWidth(s.svg, s.width, s.height, req.widthMm) : s.svg);
         break;
+      }
       case 'tikz':
         bytes = enc.encode(sceneToTikz(nodes, { numbers: getNumbers(editor.doc), measure: measureText }));
+        if (nodes.some((n) => n.type === 'image')) toast(t('tikzImagesHint'), 'info', 7000);
         break;
       case 'docx':
         bytes = await buildDocxBytes(nodes);

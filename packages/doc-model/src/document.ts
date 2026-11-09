@@ -3,6 +3,11 @@ import {
   SCHEMA_ID,
   SCHEMA_VERSION,
   type Binding,
+  type Corner,
+  type ImageCrop,
+  type ImageNode,
+  type InsetLink,
+  type ScaleBar,
   type Dash,
   type LineCap,
   type LineNode,
@@ -23,7 +28,7 @@ import {
 } from './types';
 
 export const APP_NAME = 'Quillon';
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 export const DEFAULT_FONT = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif';
 export const INK = '#1f2937';
@@ -80,6 +85,7 @@ export function createTextNode(init: Partial<Omit<TextNode, 'type'>> = {}): Text
     bold: init.bold ?? false,
     italic: init.italic ?? false,
     ...(init.align && init.align !== 'left' ? { align: init.align } : {}),
+    ...(init.panelLabel ? { panelLabel: true } : {}),
     ...extras(init),
   };
 }
@@ -184,6 +190,56 @@ export function createSymbolNode(init: Partial<Omit<SymbolNode, 'type'>> & { sym
   };
 }
 
+/** A crop that covers the whole image is stored as "no crop". */
+export function cleanCrop(c: ImageCrop | undefined): ImageCrop | undefined {
+  if (!c) return undefined;
+  const clamp = (v: number) => Math.min(1, Math.max(0, v));
+  const x = clamp(c.x), y = clamp(c.y);
+  const width = Math.max(0.005, Math.min(1 - x, c.width));
+  const height = Math.max(0.005, Math.min(1 - y, c.height));
+  if (x < 1e-4 && y < 1e-4 && width > 1 - 1e-4 && height > 1 - 1e-4) return undefined;
+  return { x, y, width, height };
+}
+
+export function createScaleBar(init: Partial<ScaleBar> = {}): ScaleBar {
+  return {
+    unitsPerPixel: init.unitsPerPixel ?? 1,
+    length: init.length ?? 10,
+    unit: init.unit ?? 'µm',
+    position: init.position ?? 'br',
+    color: init.color ?? '#ffffff',
+    showLabel: init.showLabel ?? true,
+  };
+}
+
+export function createImageNode(init: Partial<Omit<ImageNode, 'type'>> & { src: string; naturalWidth: number; naturalHeight: number }): ImageNode {
+  const crop = cleanCrop(init.crop);
+  return {
+    id: init.id ?? newId('i'),
+    type: 'image',
+    x: init.x ?? 0,
+    y: init.y ?? 0,
+    src: init.src,
+    ...(init.name ? { name: init.name } : {}),
+    naturalWidth: init.naturalWidth,
+    naturalHeight: init.naturalHeight,
+    width: init.width ?? init.naturalWidth * (crop?.width ?? 1),
+    height: init.height ?? init.naturalHeight * (crop?.height ?? 1),
+    ...(crop ? { crop } : {}),
+    brightness: init.brightness ?? 100,
+    contrast: init.contrast ?? 100,
+    saturation: init.saturation ?? 100,
+    ...(init.grayscale ? { grayscale: true } : {}),
+    ...(init.invert ? { invert: true } : {}),
+    opacity: init.opacity ?? 1,
+    border: init.border ?? 'none',
+    borderWidth: init.borderWidth ?? 1,
+    ...(init.scaleBar ? { scaleBar: init.scaleBar } : {}),
+    ...(init.inset ? { inset: init.inset } : {}),
+    ...extras(init),
+  };
+}
+
 export class DocumentFormatError extends Error {
   constructor(message: string) {
     super(message);
@@ -205,6 +261,35 @@ const ROUTINGS: readonly LineRouting[] = ['straight', 'elbow', 'curve'];
 const PLOT_KINDS: readonly PlotKind[] = ['y', 'param', 'polar'];
 const AXES: readonly PlotAxes[] = ['cross', 'box'];
 const ALIGNS: readonly TextAlign[] = ['left', 'center', 'right'];
+const CORNERS: readonly Corner[] = ['tl', 'tr', 'bl', 'br'];
+/** Embedded images must be data: URLs of a raster or SVG image (no remote or script URLs). */
+const IMAGE_URL = /^data:image\/(png|jpeg|webp|gif|svg\+xml|bmp|avif);base64,[A-Za-z0-9+/=\s]+$/;
+
+export function isImageDataUrl(v: unknown): v is string {
+  return typeof v === 'string' && IMAGE_URL.test(v);
+}
+
+function crop(v: unknown): ImageCrop | undefined {
+  if (!isObj(v)) return undefined;
+  return cleanCrop({ x: num(v.x, 0), y: num(v.y, 0), width: num(v.width, 1), height: num(v.height, 1) });
+}
+
+function scaleBar(v: unknown): ScaleBar | undefined {
+  if (!isObj(v)) return undefined;
+  return createScaleBar({
+    unitsPerPixel: pos(v.unitsPerPixel, 1, 1e-12),
+    length: pos(v.length, 10, 1e-12),
+    unit: str(v.unit, 'µm'),
+    position: oneOf(v.position, CORNERS, 'br'),
+    color: str(v.color, '#ffffff'),
+    showLabel: bool(v.showLabel, true),
+  });
+}
+
+function insetLink(v: unknown): InsetLink | undefined {
+  if (!isObj(v) || typeof v.source !== 'string' || !v.source) return undefined;
+  return typeof v.marker === 'string' && v.marker ? { source: v.source, marker: v.marker } : { source: v.source };
+}
 
 function point(v: unknown): Point | null {
   return isObj(v) && typeof v.x === 'number' && typeof v.y === 'number' && Number.isFinite(v.x) && Number.isFinite(v.y)
@@ -265,6 +350,7 @@ function normalizeNode(raw: unknown, seen: Set<string>): SciNode | null {
         bold: bool(raw.bold, false),
         italic: bool(raw.italic, false),
         align: oneOf(raw.align, ALIGNS, 'left'),
+        panelLabel: bool(raw.panelLabel, false),
       });
     case 'shape':
       return createShapeNode({
@@ -335,6 +421,29 @@ function normalizeNode(raw: unknown, seen: Set<string>): SciNode | null {
         label: str(raw.label, ''),
         labelSize: pos(raw.labelSize, 14),
       });
+    case 'image': {
+      if (!isImageDataUrl(raw.src)) return null;
+      return createImageNode({
+        ...base,
+        src: raw.src,
+        name: typeof raw.name === 'string' ? raw.name : undefined,
+        naturalWidth: pos(raw.naturalWidth, 100),
+        naturalHeight: pos(raw.naturalHeight, 100),
+        width: pos(raw.width, 100),
+        height: pos(raw.height, 100),
+        crop: crop(raw.crop),
+        brightness: Math.min(400, Math.max(0, num(raw.brightness, 100))),
+        contrast: Math.min(400, Math.max(0, num(raw.contrast, 100))),
+        saturation: Math.min(400, Math.max(0, num(raw.saturation, 100))),
+        grayscale: bool(raw.grayscale, false),
+        invert: bool(raw.invert, false),
+        opacity: Math.min(1, Math.max(0, num(raw.opacity, 1))),
+        border: str(raw.border, 'none'),
+        borderWidth: pos(raw.borderWidth, 1, 0),
+        scaleBar: scaleBar(raw.scaleBar),
+        inset: insetLink(raw.inset),
+      });
+    }
   }
   // Unknown node types (from a newer version) are dropped rather than crashing.
   return null;
@@ -395,6 +504,8 @@ function migrate(raw: Record<string, unknown>, version: number): Record<string, 
 const MIGRATIONS: Record<number, (d: Record<string, unknown>) => Record<string, unknown>> = {
   // v2 only adds node types and optional fields; v1 documents are valid as-is.
   1: (d) => ({ ...d, version: 2 }),
+  // v3 adds the image node type.
+  2: (d) => ({ ...d, version: 3 }),
 };
 
 export function serializeDocument(doc: SciDocument): string {

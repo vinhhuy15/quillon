@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import {
   createPlotFunction,
+  createScaleBar,
   DEFAULT_FONT,
   setTitle,
   updateNodes,
+  type Corner,
   type Dash,
+  type ImageNode,
   type LineCap,
   type LineNode,
   type MathNode,
@@ -12,22 +15,26 @@ import {
   type PlotFunction,
   type PlotKind,
   type PlotNode,
+  type ScaleBar,
   type SciNode,
   type ShapeKind,
   type ShapeNode,
   type SymbolNode,
   type TextNode,
 } from '@quillon/doc-model';
-import { checkExpr, getSymbol, SHAPES } from '@quillon/figure-core';
+import { checkExpr, cropOf, getSymbol, imageScale, SHAPES } from '@quillon/figure-core';
 import {
   align,
   copyForWord,
+  createInset,
+  niceLength,
   distribute,
   flipSelection,
   groupSelection,
   patchSelection,
   reorder,
   rotateSelection,
+  setImageCrop,
   toggleLock,
   ungroupSelection,
 } from '../actions';
@@ -58,7 +65,7 @@ export function Inspector() {
   const one = sel.length === 1 ? sel[0] : null;
 
   const typeName: Record<SciNode['type'], StringKey> = {
-    math: 'typeMath', text: 'typeText', shape: 'typeShape', line: 'typeLine', plot: 'typePlot', symbol: 'typeSymbol',
+    math: 'typeMath', text: 'typeText', shape: 'typeShape', line: 'typeLine', plot: 'typePlot', symbol: 'typeSymbol', image: 'typeImage',
   };
 
   return (
@@ -82,6 +89,7 @@ export function Inspector() {
             {types.length === 1 && types[0] === 'line' && <LineSection nodes={sel as LineNode[]} />}
             {types.length === 1 && types[0] === 'symbol' && <SymbolSection nodes={sel as SymbolNode[]} />}
             {one?.type === 'plot' && <PlotSection node={one} />}
+            {one?.type === 'image' && <ImageSection key={one.id} node={one} />}
             {types.length > 1 && <StrokeSection nodes={sel} />}
             <ArrangeSection nodes={sel} />
           </>
@@ -498,6 +506,181 @@ function PlotSection({ node }: { node: PlotNode }) {
   );
 }
 
+// ------------------------------------------------------------------ image
+
+function ImageSection({ node }: { node: ImageNode }) {
+  const t = useT();
+  const set = (label: string, p: NodePatch, key?: string) => editor.apply(label, (d) => updateNodes(d, { [node.id]: p }), { coalesce: key ? `${key}-${node.id}` : undefined });
+  const c = cropOf(node);
+  const pct = (v: number) => Math.round(v * 1000) / 10;
+  const edge = (side: 'l' | 't' | 'r' | 'b') => (v: number) => {
+    const f = Math.min(99, Math.max(0, v)) / 100;
+    let { x, y, width, height } = c;
+    if (side === 'l') {
+      const right = x + width;
+      x = Math.min(f, right - 0.01);
+      width = right - x;
+    } else if (side === 't') {
+      const bottom = y + height;
+      y = Math.min(f, bottom - 0.01);
+      height = bottom - y;
+    } else if (side === 'r') width = Math.max(0.01, 1 - f - x);
+    else height = Math.max(0.01, 1 - f - y);
+    setImageCrop(node, { x, y, width, height }, `crop-${side}-${node.id}`);
+  };
+  const bar = node.scaleBar;
+  const setBar = (p: Partial<ScaleBar>, key?: string) => bar && set('Scale bar', { scaleBar: { ...bar, ...p } }, key);
+  const adjusted = node.brightness !== 100 || node.contrast !== 100 || node.saturation !== 100 || node.grayscale || node.invert || node.opacity !== 1;
+  const { sx } = imageScale(node);
+  return (
+    <>
+      <Section title={t('typeImage')}>
+        <p className="insp-note img-meta" title={node.name}>
+          {node.name ? <span className="img-name">{node.name}</span> : null}
+          <span>
+            {t('originalSize')}: {node.naturalWidth} × {node.naturalHeight} px · {Math.round(sx * 100)}%
+          </span>
+        </p>
+        <div className="insp-actions">
+          <button
+            className="btn"
+            onClick={() => set('Resize', { width: Math.round(c.width * node.naturalWidth), height: Math.round(c.height * node.naturalHeight) })}
+          >
+            {t('actualPixels')}
+          </button>
+          {!node.inset && (
+            <button className="btn" onClick={() => createInset(node)}>
+              {t('createInset')}
+            </button>
+          )}
+        </div>
+        {node.inset && <p className="insp-note">{t('insetHint')}</p>}
+      </Section>
+      <Section
+        title={t('crop')}
+        actions={
+          node.crop ? (
+            <button className="link-btn" onClick={() => setImageCrop(node, { x: 0, y: 0, width: 1, height: 1 })}>
+              {t('resetCrop')}
+            </button>
+          ) : undefined
+        }
+      >
+        <div className="crop-grid">
+          <NumberField label={t('cropLeft')} value={pct(c.x)} min={0} max={99} step={1} suffix="%" onChange={edge('l')} />
+          <NumberField label={t('cropRight')} value={pct(1 - c.x - c.width)} min={0} max={99} step={1} suffix="%" onChange={edge('r')} />
+          <NumberField label={t('cropTop')} value={pct(c.y)} min={0} max={99} step={1} suffix="%" onChange={edge('t')} />
+          <NumberField label={t('cropBottom')} value={pct(1 - c.y - c.height)} min={0} max={99} step={1} suffix="%" onChange={edge('b')} />
+        </div>
+      </Section>
+      <Section
+        title={t('adjustments')}
+        actions={
+          adjusted ? (
+            <button
+              className="link-btn"
+              onClick={() => set('Reset adjustments', { brightness: 100, contrast: 100, saturation: 100, grayscale: undefined, invert: undefined, opacity: 1 })}
+            >
+              {t('reset')}
+            </button>
+          ) : undefined
+        }
+      >
+        <Slider label={t('brightness')} value={node.brightness} min={0} max={200} onChange={(v) => set('Brightness', { brightness: v }, 'bright')} />
+        <Slider label={t('contrast')} value={node.contrast} min={0} max={200} onChange={(v) => set('Contrast', { contrast: v }, 'contrast')} />
+        <Slider label={t('saturation')} value={node.saturation} min={0} max={200} disabled={!!node.grayscale} onChange={(v) => set('Saturation', { saturation: v }, 'sat')} />
+        <Slider label={t('opacity')} value={Math.round(node.opacity * 100)} min={0} max={100} onChange={(v) => set('Opacity', { opacity: v / 100 }, 'opacity')} />
+        <div className="insp-checks">
+          <Check checked={!!node.grayscale} label={t('grayscale')} onChange={(v) => set('Grayscale', { grayscale: v || undefined })} />
+          <Check checked={!!node.invert} label={t('invert')} onChange={(v) => set('Invert', { invert: v || undefined })} />
+        </div>
+        <Row label={t('frame')}>
+          <ColorField value={node.border} allowNone noneLabel={t('none')} onChange={(v) => set('Frame', { border: v }, 'border')} />
+          {node.border !== 'none' && (
+            <NumberField value={node.borderWidth} min={0} max={20} step={0.5} suffix="px" onChange={(v) => set('Frame width', { borderWidth: v }, 'border-w')} />
+          )}
+        </Row>
+      </Section>
+      <Section
+        title={t('scaleBar')}
+        actions={
+          bar ? (
+            <button className="link-btn" onClick={() => set('Remove scale bar', { scaleBar: undefined })}>
+              {t('remove')}
+            </button>
+          ) : (
+            <button className="link-btn" onClick={() => set('Add scale bar', { scaleBar: createScaleBar({ length: niceBarLength(node) }) })}>
+              {t('addScaleBar')}
+            </button>
+          )
+        }
+      >
+        {bar && (
+          <>
+            <Row label={t('pixelSize')}>
+              <NumberField value={bar.unitsPerPixel} min={1e-9} step={0.01} onChange={(v) => setBar({ unitsPerPixel: v }, 'bar-cal')} />
+              <Select
+                value={UNITS.includes(bar.unit) ? bar.unit : null}
+                options={UNITS.map((u) => ({ value: u, label: `${u}/px` }))}
+                onChange={(u) => setBar({ unit: u })}
+              />
+            </Row>
+            <Row label={t('barLength')}>
+              <NumberField value={bar.length} min={1e-9} step={1} suffix={bar.unit} onChange={(v) => setBar({ length: v }, 'bar-len')} />
+            </Row>
+            <Row label={t('position')}>
+              <Segmented
+                value={bar.position}
+                options={[
+                  { value: 'tl', label: '↖', title: t('cornerTl') },
+                  { value: 'tr', label: '↗', title: t('cornerTr') },
+                  { value: 'bl', label: '↙', title: t('cornerBl') },
+                  { value: 'br', label: '↘', title: t('cornerBr') },
+                ]}
+                onChange={(v: Corner) => setBar({ position: v })}
+              />
+            </Row>
+            <Row label={t('color')}>
+              <ColorField value={bar.color} onChange={(v) => setBar({ color: v }, 'bar-color')} />
+            </Row>
+            <Check checked={bar.showLabel} label={t('showLength')} onChange={(v) => setBar({ showLabel: v })} />
+            <p className="insp-note">{t('scaleBarHint')}</p>
+          </>
+        )}
+      </Section>
+    </>
+  );
+}
+
+const UNITS = ['nm', 'µm', 'mm', 'cm', 'm', 'km', 'Å', 'px'];
+
+/** A round bar length of about a fifth of the visible width, in the default calibration (1 unit/px). */
+const niceBarLength = (n: ImageNode) => niceLength((cropOf(n).width * n.naturalWidth) / 5);
+
+function Slider({ label, value, min, max, onChange, disabled }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void; disabled?: boolean }) {
+  return (
+    <div className={`insp-row slider-row${disabled ? ' disabled' : ''}`}>
+      <label>{label}</label>
+      <div className="insp-ctl">
+        <input
+          type="range"
+          className="range"
+          min={min}
+          max={max}
+          value={value}
+          disabled={disabled}
+          onPointerDown={() => editor.seal()}
+          onPointerUp={() => editor.seal()}
+          onDoubleClick={() => onChange(100)}
+          onChange={(e) => onChange(Number(e.target.value))}
+          style={{ '--fill': `${((value - min) / (max - min)) * 100}%` } as React.CSSProperties}
+        />
+        <span className="range-val">{value}%</span>
+      </div>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------------ arrange
 
 function ArrangeSection({ nodes }: { nodes: SciNode[] }) {
@@ -505,7 +688,10 @@ function ArrangeSection({ nodes }: { nodes: SciNode[] }) {
   const doc = useEditor((s) => s.doc);
   const one = nodes.length === 1 ? nodes[0] : null;
   const l = one ? getLayout(one, getNumbers(doc)) : null;
-  const sized = one && (one.type === 'shape' || one.type === 'symbol' || one.type === 'plot') ? one : null;
+  const sized = one && (one.type === 'shape' || one.type === 'symbol' || one.type === 'plot' || one.type === 'image') ? one : null;
+  // Images keep their aspect ratio when one side is typed in.
+  const setW = (v: number) => sized && (sized.type === 'image' ? set('Resize', { width: v, height: Math.round((v * sized.height) / sized.width) }, 'w') : set('Resize', { width: v }, 'w'));
+  const setH = (v: number) => sized && (sized.type === 'image' ? set('Resize', { height: v, width: Math.round((v * sized.width) / sized.height) }, 'h') : set('Resize', { height: v }, 'h'));
   const rotatable = nodes.filter((n): n is ShapeNode | SymbolNode => n.type === 'shape' || n.type === 'symbol');
   const grouped = nodes.some((n) => n.group);
   const locked = nodes.every((n) => n.locked);
@@ -518,8 +704,8 @@ function ArrangeSection({ nodes }: { nodes: SciNode[] }) {
           <NumberField label="Y" value={one.y} onChange={(v) => set('Move', { y: v }, 'y')} />
           {sized ? (
             <>
-              <NumberField label="W" value={sized.width} min={4} onChange={(v) => set('Resize', { width: v }, 'w')} />
-              <NumberField label="H" value={sized.height} min={4} onChange={(v) => set('Resize', { height: v }, 'h')} />
+              <NumberField label="W" value={Math.round(sized.width)} min={4} onChange={setW} />
+              <NumberField label="H" value={Math.round(sized.height)} min={4} onChange={setH} />
             </>
           ) : (
             l && (

@@ -1,13 +1,13 @@
 /**
- * Core document schema for Quillon (.sci files).
+ * Core document schema for Quillon (.qln files).
  * The array order of `nodes` is the z-order (first = bottom).
  */
 
 export const SCHEMA_ID = 'quillon/document';
 /** Schema ids written by earlier versions of the app (it was called SciForge up to 0.2). */
 export const LEGACY_SCHEMA_IDS: readonly string[] = ['sciforge/document'];
-/** v1: math + text (Quillon 0.1). v2: shapes, lines/connectors, plots, symbols, groups (0.2). */
-export const SCHEMA_VERSION = 2;
+/** v1: math + text (0.1). v2: shapes, lines/connectors, plots, symbols, groups (0.2). v3: images (0.4). */
+export const SCHEMA_VERSION = 3;
 
 export type NodeId = string;
 
@@ -54,6 +54,8 @@ export interface TextNode extends BaseNode {
   bold: boolean;
   italic: boolean;
   align?: TextAlign;
+  /** A panel letter ("a", "(b)") placed by Figure layout; replaced when the layout is applied again. */
+  panelLabel?: boolean;
 }
 
 export type ShapeKind = 'rect' | 'roundrect' | 'ellipse' | 'diamond' | 'triangle' | 'parallelogram' | 'hexagon' | 'stadium';
@@ -158,14 +160,69 @@ export interface SymbolNode extends BaseNode {
   labelSize: number;
 }
 
-export type SciNode = MathNode | TextNode | ShapeNode | LineNode | PlotNode | SymbolNode;
+/** Visible part of an image, as fractions (0–1) of its natural size. */
+export interface ImageCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export type Corner = 'tl' | 'tr' | 'bl' | 'br';
+
+export interface ScaleBar {
+  /** Real-world size of one natural image pixel, in `unit` (from the microscope or camera calibration). */
+  unitsPerPixel: number;
+  /** Length of the bar, in `unit`. */
+  length: number;
+  unit: string;
+  position: Corner;
+  color: string;
+  showLabel: boolean;
+}
+
+/** An inset: a cropped copy of another image, with a marker rectangle drawn over the source. */
+export interface InsetLink {
+  source: NodeId;
+  /** Shape node outlining the inset region on the source; kept in place automatically. */
+  marker?: NodeId;
+}
+
+export interface ImageNode extends BaseNode {
+  type: 'image';
+  /** Embedded image as a data: URL (PNG, JPEG, WebP, GIF or SVG). */
+  src: string;
+  /** Original file name, if known. */
+  name?: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  /** Displayed size of the visible (cropped) region. */
+  width: number;
+  height: number;
+  crop?: ImageCrop;
+  /** Percent; 100 = unchanged. */
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  grayscale?: boolean;
+  invert?: boolean;
+  /** 0–1. */
+  opacity: number;
+  /** Frame color or 'none'. */
+  border: string;
+  borderWidth: number;
+  scaleBar?: ScaleBar;
+  inset?: InsetLink;
+}
+
+export type SciNode = MathNode | TextNode | ShapeNode | LineNode | PlotNode | SymbolNode | ImageNode;
 export type NodeType = SciNode['type'];
 
 export interface DocumentMeta {
   title: string;
   created: string;
   modified: string;
-  /** App that last wrote the file, e.g. "Quillon 0.3.0". */
+  /** App that last wrote the file, e.g. "Quillon 0.4.0". */
   generator: string;
 }
 
@@ -186,7 +243,7 @@ type Fields<T> = Omit<T, 'id' | 'type'>;
 
 /** Partial update for a node; `id`/`type` are immutable. `undefined` removes an optional field. */
 export type NodePatch = Partial<
-  Fields<MathNode> & Fields<TextNode> & Fields<ShapeNode> & Fields<LineNode> & Fields<PlotNode> & Fields<SymbolNode>
+  Fields<MathNode> & Fields<TextNode> & Fields<ShapeNode> & Fields<LineNode> & Fields<PlotNode> & Fields<SymbolNode> & Fields<ImageNode>
 >;
 
 export interface Rect {

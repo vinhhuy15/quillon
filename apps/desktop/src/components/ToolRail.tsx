@@ -1,3 +1,4 @@
+import { insertImage } from '../actions';
 import { useT } from '../i18n';
 import { persist, ui, useUi } from '../state/store';
 import { setTool, TOOLS } from '../tools';
@@ -27,6 +28,9 @@ export function ToolRail() {
           </button>
         ),
       )}
+      <button className="rail-btn" title={`${t('toolImage')} (I)`} aria-label={t('toolImage')} onClick={insertImage}>
+        <Icon name="image" size={18} />
+      </button>
       <span className="rail-sep" />
       <button
         className={`rail-btn${panelOpen && panelTab === 'shapes' ? ' on-soft' : ''}`}
