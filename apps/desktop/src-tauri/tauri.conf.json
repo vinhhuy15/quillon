@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "SciForge",
+  "version": "0.1.0",
+  "identifier": "dev.sciforge.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "SciForge",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 900,
+        "minHeight": 600,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Education",
+    "shortDescription": "Math editor and scientific figure toolkit",
+    "longDescription": "SciForge is an open-source toolkit for researchers and students: an equation editor with Word/LaTeX export, and (soon) drawing, figures and data visualization.",
+    "copyright": "Copyright © SciForge contributors. Apache-2.0.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      {
+        "ext": ["sci"],
+        "name": "SciForge document",
+        "description": "SciForge document",
+        "mimeType": "application/x-sciforge",
+        "role": "Editor"
+      }
+    ]
+  }
+}

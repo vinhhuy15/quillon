@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.vite/
+apps/desktop/public/mathlive/
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/
