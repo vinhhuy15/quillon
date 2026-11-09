@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { exportFile, type ExportFormat } from '../actions';
 import { useT, useTr, type StringKey } from '../i18n';
 import { toasts, ui, useEditor, useUi } from '../state/store';
-import { useSyncExternalStore } from 'react';
+import { Icon } from './Icons';
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', k);
@@ -12,20 +12,26 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   }, [onClose]);
   return (
     <div className="modal-back" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={title}>
-        <h2>{title}</h2>
+      <div className={`modal${wide ? ' wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
+        <header className="modal-head">
+          <h2>{title}</h2>
+          <button className="icon-btn" onClick={onClose} aria-label="Close">
+            <Icon name="close" />
+          </button>
+        </header>
         {children}
       </div>
     </div>
   );
 }
 
-const FORMATS: { id: ExportFormat; label: StringKey }[] = [
-  { id: 'png', label: 'fmtPng' },
-  { id: 'svg', label: 'fmtSvg' },
-  { id: 'docx', label: 'fmtDocx' },
-  { id: 'tex', label: 'fmtTex' },
-  { id: 'html', label: 'fmtHtml' },
+const FORMATS: { id: ExportFormat; name: string; desc: StringKey }[] = [
+  { id: 'png', name: 'PNG', desc: 'fmtPng' },
+  { id: 'svg', name: 'SVG', desc: 'fmtSvg' },
+  { id: 'docx', name: 'Word', desc: 'fmtDocx' },
+  { id: 'tikz', name: 'TikZ', desc: 'fmtTikz' },
+  { id: 'tex', name: 'LaTeX', desc: 'fmtTex' },
+  { id: 'html', name: 'HTML', desc: 'fmtHtml' },
 ];
 
 export function ExportDialog() {
@@ -54,49 +60,52 @@ export function ExportDialog() {
 
   return (
     <Modal title={t('exportTitle')} onClose={close}>
-      <fieldset>
-        <legend>{t('format')}</legend>
+      <div className="format-grid" role="radiogroup" aria-label={t('format')}>
         {FORMATS.map((f) => (
-          <label key={f.id} className="radio">
-            <input type="radio" name="fmt" checked={format === f.id} onChange={() => setFormat(f.id)} />
-            {t(f.label)}
-          </label>
+          <button key={f.id} role="radio" aria-checked={format === f.id} className={`format-card${format === f.id ? ' on' : ''}`} onClick={() => setFormat(f.id)}>
+            <b>{f.name}</b>
+            <span>{t(f.desc)}</span>
+          </button>
         ))}
-      </fieldset>
-      <fieldset>
-        <legend>{t('scope')}</legend>
-        <label className="radio">
-          <input type="radio" name="scope" checked={scope === 'selection'} disabled={!hasSel} onChange={() => setScope('selection')} />
-          {t('scopeSelection')}
-        </label>
-        <label className="radio">
-          <input type="radio" name="scope" checked={scope === 'all'} onChange={() => setScope('all')} />
-          {t('scopeAll')}
-        </label>
-      </fieldset>
-      {(raster || format === 'svg') && (
-        <fieldset className="row">
-          {raster && (
-            <label>
-              {t('resolution')}
-              <select value={dpi} onChange={(e) => setDpi(Number(e.target.value))}>
-                {[96, 150, 300, 600, 1200].map((d) => (
-                  <option key={d} value={d}>
-                    {d} DPI
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label>
-            {t('background')}
-            <select value={bg} onChange={(e) => setBg(e.target.value as 'transparent' | 'white')}>
-              <option value="transparent">{t('transparent')}</option>
-              <option value="white">{t('white')}</option>
+      </div>
+      <div className="form-rows">
+        <div className="form-row">
+          <span>{t('scope')}</span>
+          <div className="seg">
+            <button className={scope === 'selection' ? 'on' : ''} disabled={!hasSel} onClick={() => setScope('selection')}>
+              {t('scopeSelection')}
+            </button>
+            <button className={scope === 'all' ? 'on' : ''} onClick={() => setScope('all')}>
+              {t('scopeAll')}
+            </button>
+          </div>
+        </div>
+        {raster && (
+          <div className="form-row">
+            <span>{t('resolution')}</span>
+            <select className="select" value={dpi} onChange={(e) => setDpi(Number(e.target.value))}>
+              {[96, 150, 300, 600, 1200].map((d) => (
+                <option key={d} value={d}>
+                  {d} DPI
+                </option>
+              ))}
             </select>
-          </label>
-        </fieldset>
-      )}
+          </div>
+        )}
+        {(raster || format === 'svg') && (
+          <div className="form-row">
+            <span>{t('background')}</span>
+            <div className="seg">
+              <button className={bg === 'transparent' ? 'on' : ''} onClick={() => setBg('transparent')}>
+                {t('transparent')}
+              </button>
+              <button className={bg === 'white' ? 'on' : ''} onClick={() => setBg('white')}>
+                {t('white')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="modal-actions">
         <button className="btn" onClick={close}>
           {t('cancel')}
@@ -110,30 +119,38 @@ export function ExportDialog() {
 }
 
 const SHORTCUTS: [string, string][] = [
-  ['Ctrl+N / O / S', 'New / Open / Save'],
+  ['V · H', 'Select · Hand (pan)'],
+  ['M · T', 'Equation · Text'],
+  ['R · O · L · A', 'Rectangle · Ellipse · Line · Arrow'],
+  ['P', 'Function plot'],
+  ['Shift (while drawing)', 'Square / circle, 15° angles, keep proportions'],
+  ['Double-click', 'Edit equation, text or label · empty space: new equation'],
   ['Ctrl+Z / Ctrl+Y', 'Undo / Redo'],
   ['Ctrl+C / X / V', 'Copy / Cut / Paste (pasting LaTeX creates an equation)'],
   ['Ctrl+Shift+C', 'Copy for Word'],
   ['Ctrl+D', 'Duplicate'],
+  ['Ctrl+G / Ctrl+Shift+G', 'Group / Ungroup'],
+  ['Ctrl+R', 'Rotate 90°'],
+  ['Ctrl+L', 'Lock / Unlock'],
+  ['Ctrl+] / Ctrl+[', 'Bring to front / Send to back'],
   ['Delete', 'Delete'],
-  ['Enter / F2', 'Edit selected object'],
-  ['M / T', 'Add equation / text'],
   ['← ↑ → ↓ (+Shift)', 'Nudge 1px (10px)'],
-  ['Ctrl+wheel, Ctrl+= / −', 'Zoom in / out'],
-  ['Ctrl+0', 'Zoom to fit'],
+  ['Ctrl+wheel · Ctrl+= / −', 'Zoom in / out'],
+  ['Ctrl+0 · Ctrl+1', 'Zoom to fit · 100%'],
   ['Space + drag', 'Pan the view'],
-  ['Ctrl+E', 'Export'],
+  ['Ctrl+J · Ctrl+\\', 'Equation editor · Insert panel'],
+  ['Ctrl+N / O / S · Ctrl+E', 'New / Open / Save · Export'],
 ];
 
 export function AboutDialog() {
   const t = useT();
-  const open = useUi((s) => s.aboutOpen);
   const tr = useTr();
+  const open = useUi((s) => s.aboutOpen);
   if (!open) return null;
   const close = () => ui.set({ aboutOpen: false });
   return (
-    <Modal title="SciForge 0.1.0" onClose={close}>
-      <p>{t('aboutText')}</p>
+    <Modal title="SciForge 0.2.0" onClose={close} wide>
+      <p className="about">{t('aboutText')}</p>
       <h3>{t('shortcuts')}</h3>
       <table className="shortcuts">
         <tbody>
@@ -148,6 +165,9 @@ export function AboutDialog() {
         </tbody>
       </table>
       <div className="modal-actions">
+        <a className="btn" href="https://github.com/vinhhuy15/sciforge" target="_blank" rel="noreferrer">
+          GitHub
+        </a>
         <button className="btn primary" onClick={close}>
           {t('close')}
         </button>

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { strFromU8, unzipSync } from 'fflate';
-import { createMathNode, createTextNode } from '@sciforge/doc-model';
 import {
   buildDocx,
   getPngTexts,
@@ -9,11 +8,8 @@ import {
   latexToSvg,
   layoutMath,
   looksLikeLatex,
-  mathToSvg,
   normalizeLatex,
   parseXml,
-  readSvgSource,
-  sceneToSvg,
   setPngText,
   validateLatex,
   wordClipboardHtml,
@@ -132,26 +128,6 @@ describe('scene + exports', () => {
     expect(layoutMath(L`\frac{`, true, 20, '#000').error).toBeTruthy();
   });
 
-  it('embeds and reads back equation source in SVG', () => {
-    const { svg } = mathToSvg({ latex: L`\alpha<\beta & "q"`, display: true, fontSize: 30, color: '#123456' });
-    expect(parseXml(svg).name).toBe('svg');
-    const src = readSvgSource(svg);
-    expect(src?.latex).toBe(L`\alpha<\beta & "q"`);
-    expect(src?.fontSize).toBe(30);
-    expect(readSvgSource('<svg xmlns="http://www.w3.org/2000/svg"/>')).toBeNull();
-  });
-
-  it('renders a scene with numbers and text', () => {
-    const m = createMathNode({ id: 'm', latex: 'E=mc^2', x: 100, y: 50, numbered: true });
-    const t = createTextNode({ id: 't', text: 'Line 1\nLine <2>', x: 100, y: 150 });
-    const { svg, width, height } = sceneToSvg([m, t], { numbers: new Map([['m', 1]]) });
-    expect(parseXml(svg).name).toBe('svg');
-    expect(svg).toContain('>(1)</text>');
-    expect(svg).toContain('Line &lt;2&gt;');
-    expect(width).toBeGreaterThan(50);
-    expect(height).toBeGreaterThan(100);
-  });
-
   it('writes and reads PNG iTXt chunks', () => {
     // 1x1 transparent PNG
     const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
@@ -176,6 +152,19 @@ describe('scene + exports', () => {
     expect(root.name).toBe('w:document');
     expect(doc).toContain('<m:oMathPara><m:oMath><m:f>');
     expect(doc).toContain('<w:t>(1)</w:t>');
+  });
+
+  it('embeds PNG figures in docx, scaled to the text column', () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    const files = unzipSync(buildDocx([{ kind: 'image', png, width: 1248, height: 480, alt: 'Circuit <1>' }]));
+    expect(files['word/media/figure1.png']).toEqual(png);
+    expect(strFromU8(files['[Content_Types].xml'])).toContain('Extension="png"');
+    expect(strFromU8(files['word/_rels/document.xml.rels'])).toContain('Target="media/figure1.png"');
+    const doc = strFromU8(files['word/document.xml']);
+    expect(parseXml(doc).name).toBe('w:document');
+    // 1248px is wider than 6.5in (624px) → scaled by 1/2
+    expect(doc).toContain(`<wp:extent cx="${624 * 9525}" cy="${240 * 9525}"/>`);
+    expect(doc).toContain('descr="Circuit &lt;1&gt;"');
   });
 
   it('builds Word clipboard HTML', () => {

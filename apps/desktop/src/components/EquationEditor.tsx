@@ -6,12 +6,12 @@ import { copyForWord, editorInsertHook, viewCenter } from '../actions';
 import { useT } from '../i18n';
 import { library } from '../state/library';
 import { editor, toast, ui, useEditor, useUi } from '../state/store';
+import { Icon } from './Icons';
 import { Palette } from './Palette';
+import { toggleDock } from './TopBar';
 
 MathfieldElement.fontsDirectory = `${import.meta.env.BASE_URL}mathlive/fonts`;
 MathfieldElement.soundsDirectory = null;
-
-const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72, 96];
 
 let editSession = 0;
 
@@ -22,6 +22,7 @@ export function EquationEditor() {
   const activeId = useUi((s) => s.activeMathId);
   const showSource = useUi((s) => s.showSource);
   const focusTick = useUi((s) => s.focusEditorTick);
+  const open = useUi((s) => s.dockOpen);
   const node = useEditor((s) => {
     const n = activeId ? s.doc.nodes.find((x) => x.id === activeId) : undefined;
     return n?.type === 'math' ? n : null;
@@ -70,6 +71,7 @@ export function EquationEditor() {
     hostRef.current!.appendChild(mf);
     mfRef.current = mf;
     editorInsertHook.current = (latex) => {
+      if (!ui.get().dockOpen) ui.set({ dockOpen: true });
       mf.focus();
       return mf.insert(latex, { selectionMode: 'placeholder', focus: true, format: 'latex' });
     };
@@ -99,94 +101,65 @@ export function EquationEditor() {
     mf.insert(snippet, { selectionMode: 'placeholder', focus: true, format: 'latex' });
   };
 
-  const patch = (p: Partial<MathNode>) => {
-    if (!node) return;
-    // Color pickers fire continuously while dragging; keep those in one undo step.
-    if (!p.color) editor.seal();
-    // Size/color also become the defaults for the next new equation.
-    editor.apply(
-      'Equation style',
-      (d) => {
-        const next = updateNodes(d, { [node.id]: p });
-        if (next === d || (!p.fontSize && !p.color)) return next;
-        return {
-          ...next,
-          settings: { ...next.settings, defaultFontSize: p.fontSize ?? next.settings.defaultFontSize, defaultColor: p.color ?? next.settings.defaultColor },
-        };
-      },
-      { coalesce: p.color ? `color-${node.id}` : undefined },
-    );
-  };
-
   return (
-    <section className="eq-editor" aria-label="Equation editor">
+    <section className={`eq-dock${open ? '' : ' collapsed'}`} aria-label={t('equationEditor')}>
       <div className="eq-head">
-        <span className={`eq-mode${node ? ' editing' : ''}`}>{node ? t('editing') : t('newMode')}</span>
-        <label title={t('fontSize')}>
-          {t('fontSize')}
-          <select value={node?.fontSize ?? editor.doc.settings.defaultFontSize} disabled={!node} onChange={(e) => patch({ fontSize: Number(e.target.value) })}>
-            {[...new Set([...FONT_SIZES, node?.fontSize ?? 28])].sort((a, b) => a - b).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label title={t('color')}>
-          {t('color')}
-          <input type="color" value={node?.color ?? '#1f2937'} disabled={!node} onChange={(e) => patch({ color: e.target.value })} />
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={node?.display ?? true} disabled={!node} onChange={(e) => patch({ display: e.target.checked })} />
-          {t('displayStyle')}
-        </label>
-        <label className="check">
-          <input type="checkbox" checked={node?.numbered ?? false} disabled={!node} onChange={(e) => patch({ numbered: e.target.checked })} />
-          {t('numbered')}
-        </label>
-        <span className="spacer" />
-        <button className={`btn small${showSource ? ' on' : ''}`} onClick={() => ui.set({ showSource: !showSource })}>
-          {t('source')}
+        <button className="dock-toggle" onClick={toggleDock} aria-expanded={open} title={`${t('equationEditor')} (Ctrl+J)`}>
+          <Icon name={open ? 'chevronDown' : 'chevronRight'} size={14} />
+          <span className="eq-title">{t('equationEditor')}</span>
         </button>
-        <button
-          className="btn small"
-          disabled={!node?.latex}
-          onClick={() => {
-            if (!node) return;
-            library.add(node.latex);
-            toast(t('savedToLibrary'), 'success');
-          }}
-        >
-          ☆ {t('saveToLibrary')}
-        </button>
-        <button className="btn small primary" disabled={!node?.latex} onClick={copyForWord}>
-          W {t('copyForWord')}
-        </button>
-      </div>
-      <div className="eq-field-row">
-        <div className="eq-field" ref={hostRef} />
+        <span className={`eq-mode${node ? ' editing' : ''}`}>{node ? t('editingSelected') : t('newMode')}</span>
         {error && (
-          <div className="eq-error" title={error}>
-            ⚠ {t('latexError')}: {error}
-          </div>
+          <span className="eq-error" title={error}>
+            {t('latexError')}: {error}
+          </span>
+        )}
+        <span className="spacer" />
+        {open && (
+          <>
+            <button className={`btn small${showSource ? ' on' : ''}`} onClick={() => ui.set({ showSource: !showSource })} title={t('source')}>
+              <Icon name="latex" size={14} />
+              <span className="lbl">LaTeX</span>
+            </button>
+            <button
+              className="btn small"
+              disabled={!node?.latex}
+              title={t('saveToLibrary')}
+              onClick={() => {
+                if (!node) return;
+                library.add(node.latex);
+                toast(t('savedToLibrary'), 'success');
+              }}
+            >
+              <Icon name="library" size={14} />
+              <span className="lbl">{t('saveToLibrary')}</span>
+            </button>
+            <button className="btn small" disabled={!node?.latex} onClick={copyForWord} title={t('copyForWord')}>
+              <Icon name="word" size={14} />
+              <span className="lbl">{t('copyForWord')}</span>
+            </button>
+          </>
         )}
       </div>
-      {showSource && (
-        <textarea
-          className="eq-source"
-          spellCheck={false}
-          value={latex}
-          disabled={!node}
-          placeholder="\frac{a}{b}"
-          onKeyDown={(e) => e.stopPropagation()}
-          onFocus={() => {
-            editSession++;
-            editor.seal();
-          }}
-          onChange={(e) => node && editor.apply('Edit LaTeX', (d) => updateNodes(d, { [node.id]: { latex: e.target.value } }), { coalesce: `edit-${editSession}` })}
-        />
-      )}
-      <Palette onInsert={insert} />
+      <div className="eq-body" hidden={!open}>
+        <div className="eq-field" ref={hostRef} />
+        {showSource && (
+          <textarea
+            className="eq-source"
+            spellCheck={false}
+            value={latex}
+            disabled={!node}
+            placeholder="\frac{a}{b}"
+            onKeyDown={(e) => e.stopPropagation()}
+            onFocus={() => {
+              editSession++;
+              editor.seal();
+            }}
+            onChange={(e) => node && editor.apply('Edit LaTeX', (d) => updateNodes(d, { [node.id]: { latex: e.target.value } }), { coalesce: `edit-${editSession}` })}
+          />
+        )}
+        <Palette onInsert={insert} />
+      </div>
     </section>
   );
 }

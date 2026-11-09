@@ -1,5 +1,6 @@
 import { equationNumbers, type NodeId, type Rect, type SciDocument, type SciNode } from '@sciforge/doc-model';
-import { labelWidth, layoutNode, type NodeLayout, type TextMeasurer } from '@sciforge/math-core';
+import { attachGeometry, layoutNode, resolveConnectors, type NodeLayout, type TextMeasurer } from '@sciforge/figure-core';
+import { editor } from './state/store';
 
 let ctx: CanvasRenderingContext2D | null = null;
 export const measureText: TextMeasurer = (text, font) => {
@@ -16,7 +17,7 @@ export function getLayout(n: SciNode, numbers: Map<NodeId, number>): NodeLayout 
   const num = numbers.get(n.id);
   const hit = cache.get(n);
   if (hit && hit.num === num) return hit.layout;
-  const layout = layoutNode(n, numbers, measureText);
+  const layout = layoutNode(n, { numbers, measure: measureText });
   cache.set(n, { num, layout });
   return layout;
 }
@@ -31,9 +32,14 @@ export function getNumbers(doc: SciDocument): Map<NodeId, number> {
   return m;
 }
 
-/** Bounds of a node including its equation number label. */
+/** World bounds of a node including labels and equation numbers. */
 export function nodeBounds(n: SciNode, doc: SciDocument): Rect {
-  const l = getLayout(n, getNumbers(doc));
-  const w = l.label ? Math.max(l.width, labelWidth(l.label)) : l.width;
-  return { x: n.x, y: n.y, width: w, height: l.height };
+  return getLayout(n, getNumbers(doc)).bounds;
 }
+
+export function attachOf(n: SciNode, doc: SciDocument) {
+  return attachGeometry(n, getLayout(n, getNumbers(doc)));
+}
+
+// Keep connectors glued to the nodes they attach to after every edit.
+editor.setNormalizer((doc) => resolveConnectors(doc, (n) => attachOf(n, doc)));

@@ -28,11 +28,15 @@ export interface ApplyOptions {
 
 type Listener = () => void;
 
+/** Runs after every change to keep derived data consistent (e.g. re-routing connectors). */
+export type Normalizer = (doc: SciDocument, prev: SciDocument) => SciDocument;
+
 export class Editor {
   private history = new History<SciDocument>();
   private listeners = new Set<Listener>();
   private savedDoc: SciDocument | null;
   private state: EditorState;
+  private normalizer: Normalizer | null = null;
 
   constructor(doc: SciDocument = createDocument()) {
     this.savedDoc = doc;
@@ -71,10 +75,15 @@ export class Editor {
     for (const fn of this.listeners) fn();
   }
 
+  setNormalizer(fn: Normalizer | null): void {
+    this.normalizer = fn;
+  }
+
   /** Apply a pure document transform as one (possibly coalesced) undoable step. */
   apply(label: string, fn: (doc: SciDocument) => SciDocument, opts: ApplyOptions = {}): boolean {
     const prev = this.state.doc;
-    const next = fn(prev);
+    let next = fn(prev);
+    if (next !== prev && this.normalizer) next = this.normalizer(next, prev);
     if (next === prev) {
       if (opts.select) this.select(opts.select);
       return false;
@@ -112,6 +121,7 @@ export class Editor {
   /** Replace the whole document (new/open). Clears history. */
   load(doc: SciDocument, file: { name: string | null; path: string | null } = { name: null, path: null }): void {
     this.history.clear();
+    if (this.normalizer) doc = this.normalizer(doc, doc);
     this.savedDoc = doc;
     this.set({ doc, selection: [], fileName: file.name, filePath: file.path });
   }

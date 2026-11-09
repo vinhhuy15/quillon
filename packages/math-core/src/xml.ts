@@ -59,7 +59,16 @@ export function parseXml(src: string): XmlElement {
       if (!el || el.name !== name) throw new XmlParseError(`Mismatched </${name}>`);
       i = end + 1;
     } else {
-      const m = /^<([\w:.-]+)((?:\s+[\w:.-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>/.exec(src.slice(lt, lt + 4096));
+      // Find the end of the tag, skipping '>' inside quoted attribute values (paths can be long).
+      let j = lt + 1;
+      for (let q = ''; j < src.length; j++) {
+        const c = src[j];
+        if (q) {
+          if (c === q) q = '';
+        } else if (c === '"' || c === "'") q = c;
+        else if (c === '>') break;
+      }
+      const m = /^<([\w:.-]+)((?:\s+[\w:.-]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>$/.exec(src.slice(lt, j + 1));
       if (!m) throw new XmlParseError(`Bad tag at ${lt}`);
       const attrs: Record<string, string> = {};
       const re = /([\w:.-]+)\s*=\s*("([^"]*)"|'([^']*)')/g;
