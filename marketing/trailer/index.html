@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quillon trailer</title>
+<style>
+  @font-face { font-family: 'Inter'; src: url('../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; }
+  :root { --ink: #0c1220; --ink2: #151d30; --quill: #22b8a2; --teal: #3fd6bf; --paper: #f5f1e8; --muted: #94a0b8; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+  body { font-family: 'Inter', 'Segoe UI', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(1400px 900px at 50% 40%, #18223a 0%, var(--ink) 55%, #070a12 100%); }
+  .abs { position: absolute; will-change: transform, opacity; }
+  #grid { inset: -200px; background-image: radial-gradient(rgba(255,255,255,0.13) 1.3px, transparent 1.6px); background-size: 40px 40px; }
+  #glow { width: 1400px; height: 1400px; left: 260px; top: -160px; border-radius: 50%; background: radial-gradient(circle, rgba(34,184,162,0.22), rgba(34,184,162,0) 62%); }
+  .glyph { opacity: 0; }
+  .glyph svg { display: block; }
+  .h1 { font-weight: 750; letter-spacing: -0.035em; line-height: 1.02; }
+  .h2 { font-weight: 600; letter-spacing: -0.02em; }
+  .kicker { font-size: 22px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--teal); }
+  .sub { font-size: 30px; color: var(--muted); font-weight: 450; line-height: 1.35; letter-spacing: -0.01em; }
+  .center { left: 0; right: 0; text-align: center; }
+  .chip { display: inline-flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px; font-size: 24px; font-weight: 550;
+          background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); color: #e9eef7; backdrop-filter: blur(8px); white-space: nowrap; }
+  .chip i { width: 10px; height: 10px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 14px var(--teal); }
+  .window { border-radius: 18px; overflow: hidden; background: #fff; box-shadow: 0 40px 120px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08); }
+  .window img { display: block; width: 100%; height: auto; }
+  .accent { color: var(--teal); }
+  #flash { inset: 0; background: #fff; opacity: 0; }
+  #vignette { inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%); pointer-events: none; }
+  #black { inset: 0; background: #000; }
+  .tile { width: 250px; height: 150px; border-radius: 20px; background: linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+          border: 1px solid rgba(255,255,255,0.14); display: flex; flex-direction: column; justify-content: center; padding: 0 28px; gap: 8px; }
+  .tile b { font-size: 38px; font-weight: 700; letter-spacing: -0.02em; }
+  .tile span { font-size: 19px; color: var(--muted); }
+  #marquee { white-space: nowrap; font-size: 34px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.02em; }
+  #marquee em { font-style: normal; color: var(--teal); margin: 0 26px; }
+  .pill { display: inline-block; padding: 12px 26px; border-radius: 999px; font-size: 24px; font-weight: 550; border: 1px solid rgba(255,255,255,0.18); color: #dfe6f2; margin: 0 8px; }
+  .pill.solid { background: var(--quill); border-color: var(--quill); color: #04110e; font-weight: 700; }
+  #cursor { width: 34px; height: 34px; }
+  .ripple { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--teal); opacity: 0; }
+  .split { overflow: hidden; }
+  .label-card { padding: 18px 26px; border-radius: 16px; background: rgba(12,18,32,0.82); border: 1px solid rgba(255,255,255,0.14); font-size: 24px; font-weight: 600; backdrop-filter: blur(10px); }
+  .label-card small { display: block; font-size: 17px; font-weight: 500; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="glow" class="abs"></div>
+  <div id="grid" class="abs"></div>
+  <div id="glyphs"></div>
+
+  <!-- A: hook -->
+  <div id="a1" class="abs center h1" style="top: 440px; font-size: 92px">Every discovery</div>
+  <div id="a2" class="abs center h1" style="top: 545px; font-size: 92px">starts on a <span class="accent">page.</span></div>
+
+  <!-- B: logo -->
+  <div id="logoWrap" class="abs" style="left: 760px; top: 330px; width: 400px; height: 400px">
+    <div id="ring" class="abs" style="inset: 0; border-radius: 50%; border: 2px solid rgba(63,214,191,0.5)"></div>
+    <img id="logo" class="abs" src="../../apps/desktop/public/logo.svg" style="left: 100px; top: 100px; width: 200px; height: 200px">
+  </div>
+  <div id="word" class="abs center h1" style="top: 640px; font-size: 120px">Quillon</div>
+  <div id="tag" class="abs center sub" style="top: 800px; font-size: 34px">Equations, diagrams and figures. <span style="color:#fff">One app.</span></div>
+
+  <!-- C: math -->
+  <div id="cKick" class="abs kicker" style="left: 140px; top: 300px">01 · Equations</div>
+  <div id="cT" class="abs h1" style="left: 136px; top: 350px; font-size: 84px">Write math<br>the way<br>you <span class="accent">think.</span></div>
+  <div id="cS" class="abs sub" style="left: 140px; top: 690px; width: 600px">Type it, or type LaTeX. Paste it into Word as a real, editable equation.</div>
+  <div id="cWin" class="abs window" style="left: 860px; top: 180px; width: 1160px"><img src="../../docs/images/equations.png"></div>
+  <div id="cCard" class="abs label-card" style="left: 140px; top: 820px; padding: 28px 40px; border-color: rgba(63,214,191,0.45)"><div id="cMath"></div></div>
+
+  <!-- D: diagrams -->
+  <div id="dKick" class="abs kicker center" style="top: 92px">02 · Diagrams</div>
+  <div id="dT" class="abs h1 center" style="top: 132px; font-size: 76px">Draw the physics. <span class="accent">Not the pixels.</span></div>
+  <div id="dWin" class="abs window" style="left: 300px; top: 280px; width: 1320px; height: 650px"><img id="dImg" src="../../docs/images/physics.png" style="transform-origin: 40% 45%"></div>
+  <div id="dWin2" class="abs window" style="left: 1180px; top: 380px; width: 640px"><img src="../../docs/images/flowchart.png"></div>
+  <div id="dC1" class="abs chip" style="left: 380px; top: 966px"><i></i>45 scientific symbols</div>
+  <div id="dC2" class="abs chip" style="left: 780px; top: 966px"><i></i>Connectors that stay attached</div>
+  <div id="dC3" class="abs chip" style="left: 1250px; top: 966px"><i></i>Math in every label</div>
+
+  <!-- E: plots (pure graphic) -->
+  <div id="eKick" class="abs kicker" style="left: 140px; top: 330px">03 · Plots</div>
+  <div id="eT" class="abs h1" style="left: 136px; top: 380px; font-size: 84px">Plot anything<br>you can <span class="accent">write.</span></div>
+  <div id="eS" class="abs sub" style="left: 140px; top: 600px; width: 560px">y = f(x), parametric and polar curves. Textbook axes or journal style.</div>
+  <svg id="plot" class="abs" style="left: 780px; top: 150px" width="1020" height="780" viewBox="0 0 1020 780"></svg>
+
+  <!-- F: figures -->
+  <div id="fKick" class="abs kicker center" style="top: 80px">04 · Figures · new in 0.4</div>
+  <div id="fT" class="abs h1 center" style="top: 120px; font-size: 76px">Publication figures, <span class="accent">assembled.</span></div>
+  <div id="fWin" class="abs window" style="left: 260px; top: 280px; width: 1400px; height: 760px">
+    <div id="fInner" class="abs" style="inset: 0; transform-origin: 38% 52%">
+      <img src="assets/figures-plain.png" class="abs" style="left:0; top:0; width:1400px">
+      <div id="fSplit" class="abs split" style="left: 0; top: 0; bottom: 0; width: 0"><img src="../../docs/images/colorblind.png" style="width: 1400px"></div>
+      <div id="fBar" class="abs" style="top: 0; bottom: 0; width: 4px; left: 0; background: var(--teal); box-shadow: 0 0 24px var(--teal); opacity: 0"></div>
+    </div>
+    <div id="fBadge" class="abs chip" style="right: 28px; bottom: 28px; background: rgba(12,18,32,0.85)"><i></i>Deuteranopia simulation</div>
+  </div>
+  <div id="fL1" class="abs label-card" style="left: 120px; top: 420px">Scale bars<small>from your calibration</small></div>
+  <div id="fL2" class="abs label-card" style="left: 1540px; top: 360px">Zoomed insets<small>marker follows the crop</small></div>
+  <div id="fL3" class="abs label-card" style="left: 1540px; top: 600px">Panel labels<small>a · b · c, one click</small></div>
+  <div id="fL4" class="abs label-card" style="left: 120px; top: 760px">Color-vision check<small>see what 1 in 12 men see</small></div>
+
+  <!-- G: export -->
+  <div id="gKick" class="abs kicker center" style="top: 190px">05 · Export</div>
+  <div id="gT" class="abs h1 center" style="top: 232px; font-size: 84px">One page. <span class="accent">Every destination.</span></div>
+  <div id="tiles"></div>
+  <div id="gJ" class="abs center sub" style="top: 790px; font-size: 26px">Sized for the journal column, with the text checked for print</div>
+  <div id="marquee" class="abs" style="top: 860px; left: 0"></div>
+
+  <!-- H: end card -->
+  <img id="hLogo" class="abs" src="../../apps/desktop/public/logo.svg" style="left: 885px; top: 250px; width: 150px; height: 150px">
+  <div id="hWord" class="abs center h1" style="top: 430px; font-size: 104px">Quillon</div>
+  <div id="hTag" class="abs center sub" style="top: 570px">Equations, diagrams and scientific figures in one app.</div>
+  <div id="hPills" class="abs center" style="top: 680px"><span class="pill solid">Free &amp; open source</span><span class="pill">Windows · macOS · Linux · Web</span><span class="pill">v0.4</span></div>
+  <div id="hUrl" class="abs center" style="top: 800px; font-size: 28px; color: var(--muted); letter-spacing: 0.02em">github.com/vinhhuy15/quillon</div>
+
+  <svg id="cursor" class="abs" viewBox="0 0 24 24"><path d="M4 2.5 19.5 13l-6.8 1.2 3.9 7.6-3 1.5-3.9-7.6L4.5 20z" fill="#fff" stroke="#0c1220" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  <div id="ripple" class="abs ripple"></div>
+
+  <div id="vignette" class="abs"></div>
+  <div id="flash" class="abs"></div>
+  <div id="black" class="abs"></div>
+</div>
+
+<script src="math.js"></script>
+<script>
+const DURATION = 44;
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const p = (t, a, b) => clamp((t - a) / (b - a));
+const outC = (x) => 1 - Math.pow(1 - x, 3);
+const outE = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+/** Visible from a→b (fade in over `fi`), fading out over `fo` before b. */
+const life = (t, a, b, fi = 0.6, fo = 0.5) => Math.min(outC(p(t, a, a + fi)), 1 - inOut(p(t, b - fo, b)));
+function set(el, o, tf = '', extra) {
+  el = typeof el === 'string' ? $(el) : el;
+  el.style.opacity = o;
+  el.style.transform = tf;
+  el.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
+  if (extra) Object.assign(el.style, extra);
+}
+/** Rise-in text: slides up and unblurs. */
+function rise(el, t, a, b, dy = 40, fi = 0.8, fo = 0.5) {
+  const k = outE(p(t, a, a + fi));
+  const o = life(t, a, b, fi, fo);
+  const out = inOut(p(t, b - fo, b));
+  set(el, o, `translateY(${(1 - k) * dy - out * 20}px)`, { filter: `blur(${(1 - k) * 10 + out * 6}px)` });
+}
+
+// ---------- floating math glyphs (filled by render.mjs, falls back to text)
+const MATH = window.MATH || [];
+const glyphs = MATH.map((svg, i) => {
+  const d = document.createElement('div');
+  d.className = 'abs glyph';
+  d.innerHTML = svg;
+  $('glyphs').appendChild(d);
+  const r = (n) => { const x = Math.sin(i * 12.9898 + n * 78.233) * 43758.5453; return x - Math.floor(x); };
+  return { el: d, x: r(1) * 1800 - 40, y: (i / MATH.length) * 1160 + r(2) * 60, z: 0.4 + r(3) * 0.9, sp: 10 + r(4) * 25, rot: (r(5) - 0.5) * 10 };
+});
+if (MATH.length) {
+  $('cMath').innerHTML = window.HERO || '';
+}
+
+// ---------- tiles for export
+const FORMATS = [['Word', 'native equations'], ['LaTeX', 'article + TikZ'], ['TikZ', 'compiles with pdflatex'], ['PNG', 'up to 1200 DPI'], ['SVG', 'crisp vectors'], ['HTML', 'MathML + SVG']];
+const tiles = FORMATS.map(([b, s], i) => {
+  const d = document.createElement('div');
+  d.className = 'abs tile';
+  d.innerHTML = `<b>${b}</b><span>${s}</span>`;
+  d.style.left = `${140 + i * 280}px`;
+  d.style.top = '470px';
+  $('tiles').appendChild(d);
+  return d;
+});
+$('marquee').innerHTML = Array(3).fill(['Nature', 'Science', 'Cell Press', 'PNAS', 'Elsevier', 'IEEE', 'ACS', 'APS'].join('<em>·</em>')).join('<em>·</em>');
+
+// ---------- plot graphic
+const PW = 1020, PH = 780, ox = 90, oy = 400, sx = 66, sy = 150;
+const X = (x) => ox + x * sx, Y = (y) => oy - y * sy;
+function curve(f, a, b, n = 400) {
+  let d = '';
+  for (let i = 0; i <= n; i++) { const x = a + (b - a) * (i / n); d += (i ? 'L' : 'M') + X(x).toFixed(1) + ' ' + Y(f(x)).toFixed(1); }
+  return d;
+}
+const plot = $('plot');
+let grid = '';
+for (let i = 0; i <= 13; i++) grid += `<line x1="${X(i)}" y1="${Y(2.2)}" x2="${X(i)}" y2="${Y(-2.2)}" />`;
+for (let j = -2; j <= 2; j++) grid += `<line x1="${X(0)}" y1="${Y(j)}" x2="${X(13.6)}" y2="${Y(j)}" />`;
+plot.innerHTML = `
+  <defs><filter id="gl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g id="pgrid" stroke="rgba(255,255,255,0.07)" stroke-width="1.5">${grid}</g>
+  <path id="pax" d="M${X(0)} ${Y(0)} H${X(13.8)} M${X(0)} ${Y(2.4)} V${Y(-2.4)}" stroke="rgba(255,255,255,0.7)" stroke-width="3" fill="none"/>
+  <path id="c1" d="${curve((x) => 1.6 * Math.sin(x), 0, 13.5)}" stroke="#3fd6bf" stroke-width="5" fill="none" filter="url(#gl)" stroke-linecap="round"/>
+  <path id="c2" d="${curve((x) => 2 * Math.exp(-x / 4) * Math.cos(2 * x), 0, 13.5)}" stroke="#f5a524" stroke-width="5" fill="none" filter="url(#gl)" stroke-linecap="round"/>
+  <path id="c3" d="${curve((x) => 1.8 * Math.exp(-((x - 6.5) ** 2) / 2.5) - 0.0, 0, 13.5)}" stroke="#a78bfa" stroke-width="5" fill="none" filter="url(#gl)" stroke-linecap="round"/>
+  <g font-family="Times New Roman, serif" font-style="italic" font-size="34" fill="#fff">
+    <text id="l1" x="${X(1.7)}" y="${Y(1.85)}" fill="#3fd6bf">y = sin x</text>
+    <text id="l2" x="${X(8.4)}" y="${Y(-0.9)}" fill="#f5a524">e<tspan dy="-14" font-size="24">−x/4</tspan><tspan dy="14"> cos 2x</tspan></text>
+    <text id="l3" x="${X(7.6)}" y="${Y(1.95)}" fill="#a78bfa">e<tspan dy="-14" font-size="24">−(x−μ)²</tspan></text>
+  </g>`;
+const lens = ['c1', 'c2', 'c3'].map((id) => { const el = $(id); const L = el.getTotalLength(); el.style.strokeDasharray = L; return [el, L]; });
+
+// ---------- main render
+window.render = function (t) {
+  // background
+  const camZ = 1 + t * 0.004;
+  set('grid', 0.25 + 0.75 * outC(p(t, 0, 2.5)) - 0.5 * life(t, 20, 25.6, 0.6, 0.6), `translate(${-t * 6}px, ${-t * 3}px) scale(${camZ})`);
+  set('glow', 0.5 + 0.5 * Math.sin(t * 0.6), `translate(${Math.sin(t * 0.3) * 120}px, ${Math.cos(t * 0.25) * 60}px)`);
+  set('black', 1 - outC(p(t, 0, 1.2)) + inOut(p(t, DURATION - 1.0, DURATION)));
+
+  // glyph field: dense in the hook, faint behind the end card
+  const gField = Math.max(life(t, 0.3, 8.6, 1.5, 1.0) * 0.5, life(t, 37.4, DURATION, 1.5, 1.2) * 0.16);
+  for (const g of glyphs) {
+    const yy = ((g.y - t * g.sp * g.z) % 1160 + 1160) % 1160 - 80;
+    const xx = g.x + Math.sin(t * 0.4 + g.x) * 20;
+    // Keep the middle of the frame clear for the titles.
+    const dx = (xx + 120 - 960) / 700, dy = (yy + 30 - 560) / 330;
+    const clear = clamp(Math.hypot(dx, dy) - 0.55, 0, 1);
+    set(g.el, gField * (0.2 + 0.55 * g.z) * clear, `translate(${xx}px, ${yy}px) scale(${g.z}) rotate(${g.rot}deg)`, { filter: `blur(${Math.max(0, (0.9 - g.z) * 3)}px)` });
+  }
+
+  // A
+  rise('a1', t, 0.8, 4.2, 50);
+  rise('a2', t, 1.25, 4.2, 50);
+
+  // B: logo reveal
+  const lb = life(t, 4.3, 8.7, 0.9, 0.6);
+  const lk = outE(p(t, 4.3, 5.4));
+  set('logoWrap', lb, `scale(${lerp(0.55, 1, lk) + inOut(p(t, 8.1, 8.7)) * 0.15})`);
+  set('ring', (1 - p(t, 4.5, 6.2)) * 0.9, `scale(${lerp(0.5, 1.6, outC(p(t, 4.5, 6.2)))})`);
+  $('logo').style.filter = `drop-shadow(0 0 ${40 * (1 - p(t, 4.6, 6.5)) + 20}px rgba(34,184,162,0.55))`;
+  const wk = outE(p(t, 4.9, 6.0));
+  set('word', life(t, 4.9, 8.7, 0.9, 0.6), `translateY(${(1 - wk) * 30}px)`, { letterSpacing: `${lerp(0.4, -0.035, wk)}em`, filter: `blur(${(1 - wk) * 8}px)` });
+  rise('tag', t, 5.9, 8.7, 24);
+  set('flash', 0.35 * (1 - p(t, 4.3, 4.9)) * (t > 4.3 ? 1 : 0));
+
+  // C: equations
+  rise('cKick', t, 8.8, 14.4, 20);
+  rise('cT', t, 9.0, 14.4, 40);
+  rise('cS', t, 9.6, 14.4, 24);
+  const cw = outE(p(t, 8.9, 10.2));
+  set('cWin', life(t, 8.9, 14.4, 0.8, 0.5), `perspective(2200px) translateX(${(1 - cw) * 400}px) rotateY(${lerp(-24, -9, outC(p(t, 8.9, 14.4)))}deg) rotateX(4deg) scale(${lerp(1.05, 1, cw)})`);
+  const cc = outE(p(t, 10.6, 11.4));
+  set('cCard', life(t, 10.6, 14.4, 0.6, 0.5), `translateY(${(1 - cc) * 40}px) scale(${lerp(0.92, 1, cc)})`, { clipPath: `inset(0 ${100 - 100 * inOut(p(t, 10.9, 12.6))}% 0 0 round 16px)` });
+
+  // D: diagrams
+  rise('dKick', t, 14.3, 20.2, 20);
+  rise('dT', t, 14.45, 20.2, 36);
+  const dw = outE(p(t, 14.4, 15.6));
+  set('dWin', life(t, 14.4, 20.2, 0.7, 0.5), `perspective(2400px) translateY(${(1 - dw) * 160}px) rotateX(${lerp(18, 6, dw)}deg)`);
+  $('dImg').style.transform = `scale(${lerp(1.0, 1.32, inOut(p(t, 15, 20)))}) translate(${lerp(0, -40, inOut(p(t, 15, 20)))}px, ${lerp(0, -30, inOut(p(t, 15, 20)))}px)`;
+  const d2 = outE(p(t, 17.0, 18.0));
+  set('dWin2', life(t, 17.0, 20.2, 0.6, 0.5), `perspective(1800px) translateX(${(1 - d2) * 300}px) rotateY(${lerp(-30, -12, d2)}deg)`);
+  [['dC1', 15.6], ['dC2', 16.0], ['dC3', 18.2]].forEach(([id, a]) => {
+    const k = outE(p(t, a, a + 0.6));
+    set(id, life(t, a, 20.2, 0.5, 0.5), `translateY(${(1 - k) * 30}px) scale(${lerp(0.9, 1, k)})`);
+  });
+
+  // E: plots
+  rise('eKick', t, 20.4, 25.8, 20);
+  rise('eT', t, 20.55, 25.8, 40);
+  rise('eS', t, 21.1, 25.8, 24);
+  const eo = life(t, 20.3, 25.8, 0.5, 0.5);
+  set('plot', eo, `translateX(${(1 - outE(p(t, 20.3, 21.3))) * 120}px)`);
+  $('pax').style.strokeDasharray = 2400;
+  $('pax').style.strokeDashoffset = 2400 * (1 - inOut(p(t, 20.4, 21.4)));
+  $('pgrid').style.opacity = outC(p(t, 20.6, 21.6));
+  lens.forEach(([el, L], i) => { el.style.strokeDashoffset = L * (1 - inOut(p(t, 21.2 + i * 0.7, 23.0 + i * 0.7))); });
+  ['l1', 'l2', 'l3'].forEach((id, i) => { const k = outE(p(t, 22.4 + i * 0.7, 23.0 + i * 0.7)); $(id).style.opacity = k; $(id).setAttribute('transform', `translate(0 ${(1 - k) * 16})`); });
+
+  // F: figures
+  rise('fKick', t, 26.0, 32.4, 20);
+  rise('fT', t, 26.15, 32.4, 36);
+  const fw = outE(p(t, 26.1, 27.3));
+  set('fWin', life(t, 26.1, 32.4, 0.7, 0.5), `perspective(2400px) translateY(${(1 - fw) * 140}px) rotateX(${lerp(14, 4, fw)}deg) scale(${lerp(0.96, 1, inOut(p(t, 26.1, 32.4)))})`);
+  $('fInner').style.transform = `scale(${lerp(1, 1.12, inOut(p(t, 27.0, 32.4)))})`;
+  const sp = inOut(p(t, 29.3, 31.2));
+  set('fBadge', outC(p(t, 30.4, 31.0)) * life(t, 29, 32.4, 0.1, 0.5), `translateY(${(1 - outC(p(t, 30.4, 31.0))) * 16}px)`);
+  $('fSplit').style.width = `${sp * 1400}px`;
+  set('fBar', sp > 0 && sp < 1 ? 1 : 0, '', { left: `${sp * 1400 - 2}px` });
+  [['fL1', 27.4], ['fL2', 27.9], ['fL3', 28.4], ['fL4', 29.4]].forEach(([id, a]) => {
+    const k = outE(p(t, a, a + 0.6));
+    const side = id === 'fL1' || id === 'fL4' ? -1 : 1;
+    set(id, life(t, a, 32.4, 0.5, 0.5), `translateX(${side * (1 - k) * 60}px)`);
+  });
+
+  // G: export
+  rise('gKick', t, 32.6, 37.6, 20);
+  rise('gT', t, 32.75, 37.6, 36);
+  tiles.forEach((el, i) => {
+    const a = 33.3 + i * 0.12;
+    const k = outE(p(t, a, a + 0.7));
+    set(el, life(t, a, 37.6, 0.5, 0.5), `translateY(${(1 - k) * 80 + Math.sin(t * 1.6 + i) * 6}px) rotateX(${(1 - k) * 40}deg)`);
+  });
+  rise('gJ', t, 34.4, 37.6, 20);
+  set('marquee', life(t, 34.6, 37.6, 0.6, 0.5), `translateX(${-200 - (t - 34.6) * 160}px)`);
+
+  // H: end card
+  const hk = outE(p(t, 37.8, 38.9));
+  set('hLogo', life(t, 37.8, DURATION + 1, 0.8, 0.1), `scale(${lerp(0.6, 1, hk)})`, { filter: `drop-shadow(0 0 30px rgba(34,184,162,0.5))` });
+  rise('hWord', t, 38.2, DURATION + 1, 30);
+  rise('hTag', t, 38.7, DURATION + 1, 24);
+  rise('hPills', t, 39.2, DURATION + 1, 24);
+  rise('hUrl', t, 39.7, DURATION + 1, 16);
+
+  // cursor: clicks on the equation editor, then on the figure
+  const cur = (t2, x, y) => ({ t: t2, x, y });
+  const path = [cur(10.0, 1600, 1000), cur(10.9, 1330, 715), cur(11.6, 1330, 715), cur(12.8, 1650, 300), cur(27.0, 1500, 980), cur(28.0, 1210, 620), cur(29.2, 1210, 620)];
+  let cx = 0, cy = 0, vis = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i], b = path[i + 1];
+    if (t >= a.t && t <= b.t && !(i === 3)) { const k = inOut(p(t, a.t, b.t)); cx = lerp(a.x, b.x, k); cy = lerp(a.y, b.y, k); vis = 1; }
+  }
+  vis *= Math.min(life(t, 10.0, 13.3, 0.3, 0.4) + life(t, 27.0, 29.8, 0.3, 0.4), 1);
+  set('cursor', vis, `translate(${cx}px, ${cy}px)`);
+  const click = [10.95, 28.05].find((c) => t >= c && t < c + 0.6);
+  const ck = click ? p(t, click, click + 0.6) : 0;
+  set('ripple', click ? 1 - ck : 0, `translate(${cx - 18}px, ${cy - 18}px) scale(${0.3 + ck * 1.4})`);
+};
+window.DURATION = DURATION;
+render(Number(new URLSearchParams(location.search).get('t') ?? 0));
+</script>
+</body>
+</html>

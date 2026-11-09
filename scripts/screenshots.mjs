@@ -235,6 +235,12 @@ ui.set({ colorVision: 'deuteranopia' });
 await settle();
 `);
 
+// Same figure with nothing selected (for the trailer's before/after wipe); only on request.
+if (ONLY?.has('figures-plain')) await shot('figures-plain', 1440, 900, FIGURE + `
+editor.select([]);
+await settle();
+`);
+
 await shot('figure-layout', 1440, 900, FIGURE + `
 editor.selectAll();
 ui.set({ figureOpen: true });
