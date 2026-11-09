@@ -13,7 +13,7 @@ export interface PaletteItem {
 
 export interface PaletteGroup {
   id: string;
-  label: [string, string]; // [vi, en]
+  label: string;
   icon: string; // LaTeX for the tab
   wide?: boolean; // larger buttons for structures
   items: PaletteItem[];
@@ -24,7 +24,7 @@ const s = (list: string) => list.trim().split(/\s+/).map((i) => ({ i }));
 export const PALETTES: PaletteGroup[] = [
   {
     id: 'greek',
-    label: ['Chữ Hy Lạp', 'Greek'],
+    label: 'Greek',
     icon: String.raw`\alpha\Omega`,
     items: s(String.raw`
       \alpha \beta \gamma \delta \epsilon \varepsilon \zeta \eta \theta \vartheta \iota \kappa \lambda \mu \nu \xi
@@ -34,7 +34,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'operators',
-    label: ['Phép toán', 'Operators'],
+    label: 'Operators',
     icon: String.raw`\pm\times`,
     items: s(String.raw`
       + - \pm \mp \times \div \cdot \ast \star \circ \bullet \oplus \ominus \otimes \oslash \odot
@@ -43,7 +43,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'relations',
-    label: ['Quan hệ', 'Relations'],
+    label: 'Relations',
     icon: String.raw`\le\approx`,
     items: s(String.raw`
       = \neq < > \le \ge \leqslant \geqslant \ll \gg \approx \sim \simeq \cong \equiv \not\equiv \propto
@@ -52,7 +52,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'arrows',
-    label: ['Mũi tên', 'Arrows'],
+    label: 'Arrows',
     icon: String.raw`\Rightarrow`,
     items: [
       ...s(String.raw`
@@ -69,7 +69,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'structures',
-    label: ['Cấu trúc', 'Structures'],
+    label: 'Structures',
     icon: String.raw`\frac{a}{b}`,
     wide: true,
     items: [
@@ -105,7 +105,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'bigops',
-    label: ['Tổng, tích phân', 'Sums & integrals'],
+    label: 'Sums & integrals',
     icon: String.raw`\sum\int`,
     wide: true,
     items: [
@@ -136,7 +136,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'brackets',
-    label: ['Ngoặc', 'Brackets'],
+    label: 'Brackets',
     icon: String.raw`(\,)`,
     wide: true,
     items: [
@@ -160,7 +160,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'matrices',
-    label: ['Ma trận', 'Matrices'],
+    label: 'Matrices',
     icon: String.raw`\begin{bmatrix}\cdot\end{bmatrix}`,
     wide: true,
     items: [
@@ -187,7 +187,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'functions',
-    label: ['Hàm', 'Functions'],
+    label: 'Functions',
     icon: String.raw`\sin`,
     items: [
       ...s(String.raw`\sin \cos \tan \cot \sec \csc \arcsin \arccos \arctan \sinh \cosh \tanh \coth
@@ -201,7 +201,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'chemistry',
-    label: ['Hóa học', 'Chemistry'],
+    label: 'Chemistry',
     icon: String.raw`\ce{H2O}`,
     wide: true,
     items: [
@@ -224,7 +224,7 @@ export const PALETTES: PaletteGroup[] = [
   },
   {
     id: 'misc',
-    label: ['Ký hiệu khác', 'Misc'],
+    label: 'Misc',
     icon: String.raw`\forall\mathbb{R}`,
     items: [
       ...s(String.raw`\forall \exists \nexists \emptyset \varnothing \therefore \because \top \bot \complement

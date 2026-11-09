@@ -20,7 +20,7 @@ Readers also accept a bare `document.json`.
     { "id": "m_…", "type": "math", "x": 100, "y": 80,
       "latex": "E=mc^2", "fontSize": 28, "color": "#1f2937", "display": true, "numbered": false },
     { "id": "t_…", "type": "text", "x": 100, "y": 160,
-      "text": "Ghi chú", "fontSize": 20, "color": "#1f2937", "fontFamily": "…", "bold": false, "italic": false }
+      "text": "Note", "fontSize": 20, "color": "#1f2937", "fontFamily": "…", "bold": false, "italic": false }
   ]
 }
 ```

@@ -45,7 +45,7 @@ const CORPUS = [
   L`\ce{2H2 + O2 -> 2H2O}`,
   L`\ce{CO2 + C <=> 2CO}`,
   L`x\xrightarrow[\text{below}]{\text{above}}y`,
-  L`\text{Định lý: } a^2+b^2=c^2`,
+  L`\text{Théorème: } a^2+b^2=c^2`,
   L`\prod_{k=1}^{\infty}\left(1+\frac{1}{k^2}\right)`,
   L`\iint_D f(x,y)\,dA`,
   L`\max_{x\in S} f(x)`,

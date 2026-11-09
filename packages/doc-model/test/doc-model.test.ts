@@ -106,7 +106,7 @@ describe('.sci files', () => {
   it('round-trips through the zip container', () => {
     const doc = addNodes(createDocument('Test'), [
       createMathNode({ id: 'a', latex: '\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}', numbered: true }),
-      createTextNode({ id: 'b', text: 'Định lý Viète' }),
+      createTextNode({ id: 'b', text: 'Unicode: Viète, Ω, 定理' }),
     ]);
     const bytes = encodeSci(doc, { previewSvg: '<svg/>' });
     expect(bytes[0]).toBe(0x50);

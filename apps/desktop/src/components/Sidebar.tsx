@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { insertTemplate } from '../actions';
-import { useT } from '../i18n';
+import { useT, useTr } from '../i18n';
 import { library, useLibrary } from '../state/library';
-import { useUi } from '../state/store';
 import { TEMPLATES } from '../templates-data';
 import { MathIcon } from './MathIcon';
 
 export function Sidebar() {
   const t = useT();
-  const lang = useUi((s) => s.lang);
-  const li = lang === 'vi' ? 0 : 1;
+  const tr = useTr();
   const items = useLibrary();
   const [tab, setTab] = useState<'templates' | 'library'>('templates');
   const [q, setQ] = useState('');
@@ -18,7 +16,7 @@ export function Sidebar() {
   const groups = TEMPLATES.map((g) => ({
     ...g,
     items: g.items.filter(
-      (it) => !query || it.title.some((x) => x.toLowerCase().includes(query)) || it.latex.toLowerCase().includes(query),
+      (it) => !query || it.title.toLowerCase().includes(query) || tr(it.title).toLowerCase().includes(query) || it.latex.toLowerCase().includes(query),
     ),
   })).filter((g) => g.items.length);
 
@@ -38,12 +36,12 @@ export function Sidebar() {
           <div className="side-scroll">
             {groups.map((g) => (
               <section key={g.id} className="tpl-group">
-                <h3>{g.label[li]}</h3>
+                <h3>{tr(g.label)}</h3>
                 <div className="tpl-grid">
                   {g.items.map((it) => (
-                    <button key={it.latex} className="tpl-card" title={it.title[li]} onClick={() => insertTemplate(it.latex)}>
+                    <button key={it.latex} className="tpl-card" title={tr(it.title)} onClick={() => insertTemplate(it.latex)}>
                       <MathIcon latex={it.latex} size={13} display maxWidth={230} />
-                      <span>{it.title[li]}</span>
+                      <span>{tr(it.title)}</span>
                     </button>
                   ))}
                 </div>

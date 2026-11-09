@@ -13,7 +13,7 @@ describe('palette content', () => {
 });
 
 describe('templates', () => {
-  const items = TEMPLATES.flatMap((g) => g.items.map((it) => [it.title[1], it.latex] as const));
+  const items = TEMPLATES.flatMap((g) => g.items.map((it) => [it.title, it.latex] as const));
   it.each(items)('%s renders and converts to OMML', (_t, latex) => {
     expect(validateLatex(latex)).toBeNull();
     expect(() => latexToOmml(latex)).not.toThrow();

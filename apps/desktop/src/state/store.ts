@@ -53,7 +53,7 @@ function loadLang(): Lang {
   } catch {
     /* storage unavailable */
   }
-  return navigator.language?.startsWith('vi') ? 'vi' : 'en';
+  return 'en';
 }
 
 export const ui = createStore<UiState>({

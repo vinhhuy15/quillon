@@ -17,7 +17,7 @@ import {
   zoomFit,
   zoomReset,
 } from '../actions';
-import { setLang, useT } from '../i18n';
+import { setLang, useT, useTr } from '../i18n';
 import { editor, ui, useEditor, useUi } from '../state/store';
 
 function Btn({ icon, label, onClick, disabled, kbd }: { icon: string; label: string; onClick: () => void; disabled?: boolean; kbd?: string }) {
@@ -62,6 +62,7 @@ const Item = ({ label, kbd, onClick, disabled }: { label: string; kbd?: string; 
 
 export function Toolbar() {
   const t = useT();
+  const tr = useTr();
   const { canUndo, canRedo, selection, undoLabel, redoLabel } = useEditor();
   const zoom = useUi((s) => s.zoom);
   const lang = useUi((s) => s.lang);
@@ -76,7 +77,7 @@ export function Toolbar() {
         </svg>
         <b>SciForge</b>
       </div>
-      <Menu label={lang === 'vi' ? 'Tệp' : 'File'}>
+      <Menu label={tr('File')}>
         <Item label={t('new')} kbd="Ctrl+N" onClick={fileNew} />
         <Item label={t('open')} kbd="Ctrl+O" onClick={fileOpen} />
         <Item label={t('save')} kbd="Ctrl+S" onClick={() => fileSave(false)} />
@@ -84,7 +85,7 @@ export function Toolbar() {
         <hr />
         <Item label={t('export')} kbd="Ctrl+E" onClick={() => ui.set({ exportOpen: true })} />
       </Menu>
-      <Menu label={lang === 'vi' ? 'Sửa' : 'Edit'}>
+      <Menu label={tr('Edit')}>
         <Item label={t('undo')} kbd="Ctrl+Z" onClick={() => editor.undo()} disabled={!canUndo} />
         <Item label={t('redo')} kbd="Ctrl+Y" onClick={() => editor.redo()} disabled={!canRedo} />
         <hr />
@@ -95,7 +96,7 @@ export function Toolbar() {
         <Item label={t('bringFront')} kbd="Ctrl+]" onClick={() => reorder('front')} disabled={!hasSel} />
         <Item label={t('sendBack')} kbd="Ctrl+[" onClick={() => reorder('back')} disabled={!hasSel} />
       </Menu>
-      <Menu label={lang === 'vi' ? 'Sao chép' : 'Copy as'}>
+      <Menu label={tr('Copy as')}>
         <Item label={t('copyForWord')} kbd="Ctrl+Shift+C" onClick={copyForWord} />
         <Item label={t('copyLatex')} onClick={copyLatex} />
         <Item label={t('copyMathml')} onClick={copyMathml} />
@@ -130,8 +131,8 @@ export function Toolbar() {
         ⇪ {t('export')}
       </button>
       <select className="lang" value={lang} onChange={(e) => setLang(e.target.value as 'vi' | 'en')} aria-label={t('language')}>
-        <option value="vi">Tiếng Việt</option>
         <option value="en">English</option>
+        <option value="vi">Tiếng Việt</option>
       </select>
       <Btn icon="?" label={t('about')} onClick={() => ui.set({ aboutOpen: true })} />
     </header>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { exportFile, type ExportFormat } from '../actions';
-import { useT, type StringKey } from '../i18n';
+import { useT, useTr, type StringKey } from '../i18n';
 import { toasts, ui, useEditor, useUi } from '../state/store';
 import { useSyncExternalStore } from 'react';
 
@@ -109,26 +109,26 @@ export function ExportDialog() {
   );
 }
 
-const SHORTCUTS: [string, [string, string]][] = [
-  ['Ctrl+N / O / S', ['Mới / Mở / Lưu', 'New / Open / Save']],
-  ['Ctrl+Z / Ctrl+Y', ['Hoàn tác / Làm lại', 'Undo / Redo']],
-  ['Ctrl+C / X / V', ['Sao chép / Cắt / Dán (dán LaTeX tạo công thức)', 'Copy / Cut / Paste (pasting LaTeX creates an equation)']],
-  ['Ctrl+Shift+C', ['Sao chép cho Word', 'Copy for Word']],
-  ['Ctrl+D', ['Nhân bản', 'Duplicate']],
-  ['Delete', ['Xóa', 'Delete']],
-  ['Enter / F2', ['Sửa đối tượng đang chọn', 'Edit selected object']],
-  ['M / T', ['Thêm công thức / văn bản', 'Add equation / text']],
-  ['← ↑ → ↓ (+Shift)', ['Dịch chuyển 1px (10px)', 'Nudge 1px (10px)']],
-  ['Ctrl+wheel, Ctrl+= / −', ['Phóng to / thu nhỏ', 'Zoom in / out']],
-  ['Ctrl+0', ['Vừa màn hình', 'Zoom to fit']],
-  ['Space + drag', ['Di chuyển khung nhìn', 'Pan the view']],
-  ['Ctrl+E', ['Xuất file', 'Export']],
+const SHORTCUTS: [string, string][] = [
+  ['Ctrl+N / O / S', 'New / Open / Save'],
+  ['Ctrl+Z / Ctrl+Y', 'Undo / Redo'],
+  ['Ctrl+C / X / V', 'Copy / Cut / Paste (pasting LaTeX creates an equation)'],
+  ['Ctrl+Shift+C', 'Copy for Word'],
+  ['Ctrl+D', 'Duplicate'],
+  ['Delete', 'Delete'],
+  ['Enter / F2', 'Edit selected object'],
+  ['M / T', 'Add equation / text'],
+  ['← ↑ → ↓ (+Shift)', 'Nudge 1px (10px)'],
+  ['Ctrl+wheel, Ctrl+= / −', 'Zoom in / out'],
+  ['Ctrl+0', 'Zoom to fit'],
+  ['Space + drag', 'Pan the view'],
+  ['Ctrl+E', 'Export'],
 ];
 
 export function AboutDialog() {
   const t = useT();
   const open = useUi((s) => s.aboutOpen);
-  const lang = useUi((s) => s.lang);
+  const tr = useTr();
   if (!open) return null;
   const close = () => ui.set({ aboutOpen: false });
   return (
@@ -142,7 +142,7 @@ export function AboutDialog() {
               <td>
                 <kbd>{k}</kbd>
               </td>
-              <td>{d[lang === 'vi' ? 0 : 1]}</td>
+              <td>{tr(d)}</td>
             </tr>
           ))}
         </tbody>

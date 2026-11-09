@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { displayLatex, PALETTES, type PaletteItem } from '../palette-data';
-import { useUi } from '../state/store';
+import { useTr } from '../i18n';
 import { MathIcon } from './MathIcon';
 
 export function Palette({ onInsert }: { onInsert: (latex: string) => void }) {
-  const lang = useUi((s) => s.lang);
+  const tr = useTr();
   const [tab, setTab] = useState(() => {
     try {
       return localStorage.getItem('sciforge:palette-tab') ?? PALETTES[0].id;
@@ -32,11 +32,11 @@ export function Palette({ onInsert }: { onInsert: (latex: string) => void }) {
             role="tab"
             aria-selected={g.id === group.id}
             className={`palette-tab${g.id === group.id ? ' active' : ''}`}
-            title={g.label[lang === 'vi' ? 0 : 1]}
+            title={tr(g.label)}
             onClick={() => choose(g.id)}
           >
             <MathIcon latex={g.icon} size={14} maxWidth={44} />
-            <span>{g.label[lang === 'vi' ? 0 : 1]}</span>
+            <span>{tr(g.label)}</span>
           </button>
         ))}
       </div>
