@@ -24,7 +24,7 @@ export function StatusBar() {
         title={t('snapToGrid')}
         onClick={() => {
           ui.set({ snap: !snap });
-          persist('sciforge:snap', snap ? 'off' : 'on');
+          persist('quillon:snap', snap ? 'off' : 'on');
         }}
       >
         <Icon name="grid" size={14} />
@@ -44,7 +44,7 @@ export function StatusBar() {
           <Icon name="fit" size={14} />
         </button>
       </span>
-      <span className="muted">{isDesktop ? 'Desktop' : 'Web'} · v0.2.0</span>
+      <span className="muted">{isDesktop ? 'Desktop' : 'Web'} · v0.3.0</span>
     </footer>
   );
 }

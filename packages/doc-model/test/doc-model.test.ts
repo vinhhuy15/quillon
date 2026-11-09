@@ -117,12 +117,12 @@ describe('.sci files', () => {
     const doc = createDocument();
     expect(decodeSci(new TextEncoder().encode(JSON.stringify(doc)))).toEqual(doc);
     expect(() => decodeSci(new TextEncoder().encode('hello'))).toThrow(DocumentFormatError);
-    expect(() => parseDocument({ schema: 'sciforge/document', version: 99, nodes: [] })).toThrow(/newer/);
+    expect(() => parseDocument({ schema: 'quillon/document', version: 99, nodes: [] })).toThrow(/newer/);
   });
 
   it('repairs untrusted input', () => {
     const doc = parseDocument({
-      schema: 'sciforge/document',
+      schema: 'quillon/document',
       version: 1,
       nodes: [
         { id: 'a', type: 'math', latex: 'x', x: 'bad' },

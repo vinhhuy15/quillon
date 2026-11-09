@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { Editor, type EditorState, type ShapeKind } from '@sciforge/doc-model';
+import { Editor, type EditorState, type ShapeKind } from '@quillon/doc-model';
 
 /** Tiny observable store for UI-only state. */
 export function createStore<T extends object>(initial: T) {
@@ -20,6 +20,21 @@ export function createStore<T extends object>(initial: T) {
     },
   };
 }
+
+/** The app was called SciForge up to 0.2: carry settings, library and autosave over once. */
+function migrateStorage() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k?.startsWith('sciforge:')) continue;
+      const nk = `quillon:${k.slice('sciforge:'.length)}`;
+      if (localStorage.getItem(nk) === null) localStorage.setItem(nk, localStorage.getItem(k) ?? '');
+    }
+  } catch {
+    /* storage unavailable */
+  }
+}
+migrateStorage();
 
 export const editor = new Editor();
 
@@ -83,16 +98,16 @@ export const ui = createStore<UiState>({
   tool: 'select',
   activeMathId: null,
   editingTextId: null,
-  lang: load<Lang>('sciforge:lang', ['en', 'vi'], 'en'),
+  lang: load<Lang>('quillon:lang', ['en', 'vi'], 'en'),
   showSource: false,
   exportOpen: false,
   aboutOpen: false,
   focusEditorTick: 0,
   focusLabelTick: 0,
-  panelOpen: load('sciforge:panel', ['open', 'closed'], 'open') === 'open',
-  panelTab: load<PanelTab>('sciforge:panel-tab', ['templates', 'shapes', 'library'], 'templates'),
-  dockOpen: load('sciforge:dock', ['open', 'closed'], 'open') === 'open',
-  snap: load('sciforge:snap', ['on', 'off'], 'off') === 'on',
+  panelOpen: load('quillon:panel', ['open', 'closed'], 'open') === 'open',
+  panelTab: load<PanelTab>('quillon:panel-tab', ['templates', 'shapes', 'library'], 'templates'),
+  dockOpen: load('quillon:dock', ['open', 'closed'], 'open') === 'open',
+  snap: load('quillon:snap', ['on', 'off'], 'off') === 'on',
   contextMenu: null,
 });
 

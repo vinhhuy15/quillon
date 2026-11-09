@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { layoutMath } from '@sciforge/math-core';
+import { layoutMath } from '@quillon/math-core';
 
 /** Small static rendering of LaTeX (palette buttons, template cards). Inherits CSS color. */
 export const MathIcon = memo(function MathIcon({

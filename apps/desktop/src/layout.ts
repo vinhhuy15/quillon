@@ -1,5 +1,5 @@
-import { equationNumbers, type NodeId, type Rect, type SciDocument, type SciNode } from '@sciforge/doc-model';
-import { attachGeometry, layoutNode, resolveConnectors, type NodeLayout, type TextMeasurer } from '@sciforge/figure-core';
+import { equationNumbers, type NodeId, type Rect, type SciDocument, type SciNode } from '@quillon/doc-model';
+import { attachGeometry, layoutNode, resolveConnectors, type NodeLayout, type TextMeasurer } from '@quillon/figure-core';
 import { editor } from './state/store';
 
 let ctx: CanvasRenderingContext2D | null = null;

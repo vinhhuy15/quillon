@@ -5,8 +5,8 @@
  * circles and text — so the same definition renders to SVG and TikZ, scales without distorting
  * stroke widths, and exposes named ports that connectors snap to.
  */
-import type { Point } from '@sciforge/doc-model';
-import { escapeXml } from '@sciforge/math-core';
+import type { Point } from '@quillon/doc-model';
+import { escapeXml } from '@quillon/math-core';
 import { fmt } from './geom';
 
 export type SymbolFill = 'none' | 'ink' | 'accent' | 'paper';

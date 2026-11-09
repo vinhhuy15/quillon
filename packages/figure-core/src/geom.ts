@@ -1,4 +1,4 @@
-import type { Point, Rect } from '@sciforge/doc-model';
+import type { Point, Rect } from '@quillon/doc-model';
 
 export const fmt = (n: number) => (Math.round(n * 100) / 100).toString();
 

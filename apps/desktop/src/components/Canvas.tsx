@@ -16,8 +16,8 @@ import {
   type SciNode,
   type ShapeNode,
   type TextNode,
-} from '@sciforge/doc-model';
-import { layoutNode, nodeGroup, rotatePoint, type NodeLayout } from '@sciforge/figure-core';
+} from '@quillon/doc-model';
+import { layoutNode, nodeGroup, rotatePoint, type NodeLayout } from '@quillon/figure-core';
 import {
   addLine,
   addMath,
@@ -32,7 +32,7 @@ import {
   viewport,
   zoomAt,
 } from '../actions';
-import { useT } from '../i18n';
+import { Welcome } from './Welcome';
 import { attachOf, getLayout, getNumbers, measureText, nodeBounds } from '../layout';
 import { shapeOfTool } from '../tools';
 import { editor, ui, useEditor, useUi, type Tool } from '../state/store';
@@ -141,7 +141,6 @@ function constrainAngle(p0: Point, p: Point): Point {
 }
 
 export function Canvas() {
-  const t = useT();
   const { doc, selection } = useEditor();
   const zoom = useUi((s) => s.zoom);
   const panX = useUi((s) => s.panX);
@@ -464,9 +463,9 @@ export function Canvas() {
     e.preventDefault();
     setDropHint(false);
     const p = toCanvas(e.clientX, e.clientY);
-    const sym = e.dataTransfer.getData('application/x-sciforge-symbol');
-    const shape = e.dataTransfer.getData('application/x-sciforge-shape');
-    const latex = e.dataTransfer.getData('application/x-sciforge-latex');
+    const sym = e.dataTransfer.getData('application/x-quillon-symbol');
+    const shape = e.dataTransfer.getData('application/x-quillon-shape');
+    const latex = e.dataTransfer.getData('application/x-quillon-latex');
     if (sym) return addSymbol(sym, p);
     if (shape) return addShape(shape as ShapeNode['shape'], { x: p.x - 60, y: p.y - 40, width: 120, height: 80 });
     if (latex) return insertTemplate(latex, { x: p.x - 40, y: p.y - 20 });
@@ -545,11 +544,8 @@ export function Canvas() {
       {editingNode && (editingNode.type === 'text' || editingNode.type === 'shape') && (
         <TextEditor key={editingNode.id} node={editingNode} zoom={zoom} panX={panX} panY={panY} />
       )}
-      {doc.nodes.length === 0 && (
-        <div className="canvas-empty">
-          <p>{t('emptyTitle')}</p>
-          <p className="muted">{t('emptyHint')}</p>
-        </div>
+      {doc.nodes.length === 0 && tool === 'select' && (
+        <Welcome />
       )}
     </div>
   );

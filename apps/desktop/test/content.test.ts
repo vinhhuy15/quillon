@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { latexToOmml, validateLatex } from '@sciforge/math-core';
+import { latexToOmml, validateLatex } from '@quillon/math-core';
 import { displayLatex, PALETTES } from '../src/palette-data';
 import { TEMPLATES } from '../src/templates-data';
 

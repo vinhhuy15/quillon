@@ -34,8 +34,8 @@ export function ToolRail() {
         aria-label={t('shapesSymbols')}
         onClick={() => {
           ui.set({ panelOpen: true, panelTab: 'shapes' });
-          persist('sciforge:panel', 'open');
-          persist('sciforge:panel-tab', 'shapes');
+          persist('quillon:panel', 'open');
+          persist('quillon:panel-tab', 'shapes');
         }}
       >
         <Icon name="symbol" size={18} />

@@ -1,6 +1,6 @@
 /** Function plots: y = f(x), parametric and polar curves on textbook or paper-style axes. */
-import type { PlotFunction, PlotNode, Point, Rect } from '@sciforge/doc-model';
-import { escapeXml } from '@sciforge/math-core';
+import type { PlotFunction, PlotNode, Point, Rect } from '@quillon/doc-model';
+import { escapeXml } from '@quillon/math-core';
 import { compileExpr } from './expr';
 import { fmt } from './geom';
 import { layoutRich, type TextMeasurer } from './richtext';

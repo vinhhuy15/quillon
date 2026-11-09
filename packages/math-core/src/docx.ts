@@ -67,7 +67,7 @@ function paragraph(b: Exclude<DocxBlock, { kind: 'image' }>): string {
   return `<w:p>${runs}</w:p>`;
 }
 
-export function buildDocx(blocks: DocxBlock[], title = 'SciForge export'): Uint8Array {
+export function buildDocx(blocks: DocxBlock[], title = 'Quillon export'): Uint8Array {
   const media: Record<string, Uint8Array> = {};
   const docRels: string[] = [];
   let imageNo = 0;
@@ -105,7 +105,7 @@ export function buildDocx(blocks: DocxBlock[], title = 'SciForge export'): Uint8
   const core =
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
     `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/">` +
-    `<dc:title>${escapeXml(title)}</dc:title><dc:creator>SciForge</dc:creator></cp:coreProperties>`;
+    `<dc:title>${escapeXml(title)}</dc:title><dc:creator>Quillon</dc:creator></cp:coreProperties>`;
   const files: Record<string, Uint8Array> = {
     '[Content_Types].xml': strToU8(contentTypes),
     '_rels/.rels': strToU8(rels),

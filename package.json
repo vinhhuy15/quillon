@@ -1,8 +1,8 @@
 {
-  "name": "sciforge",
-  "version": "0.2.0",
+  "name": "quillon",
+  "version": "0.3.0",
   "private": true,
-  "description": "SciForge — open-source all-in-one toolkit for math, figures and scientific visuals",
+  "description": "Quillon — open-source all-in-one toolkit for math, figures and scientific visuals",
   "license": "Apache-2.0",
   "type": "module",
   "workspaces": [
@@ -10,13 +10,13 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @sciforge/desktop",
-    "build": "npm run build -w @sciforge/desktop",
+    "dev": "npm run dev -w @quillon/desktop",
+    "build": "npm run build -w @quillon/desktop",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -p packages/doc-model && tsc -p packages/math-core && tsc -p packages/figure-core && tsc -p apps/desktop",
-    "tauri": "npm run tauri -w @sciforge/desktop --",
-    "icons": "node scripts/make-icon.mjs && npm run tauri -w @sciforge/desktop -- icon src-tauri/icons/source.png"
+    "tauri": "npm run tauri -w @quillon/desktop --",
+    "icons": "node scripts/render-icon.mjs && npm run tauri -w @quillon/desktop -- icon src-tauri/icons/source.png"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

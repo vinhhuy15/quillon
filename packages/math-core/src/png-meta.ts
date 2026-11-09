@@ -1,5 +1,5 @@
 /**
- * Read/write UTF-8 text chunks (iTXt) in PNG files. SciForge stores the
+ * Read/write UTF-8 text chunks (iTXt) in PNG files. Quillon stores the
  * equation source in exported PNGs so they can be re-opened and edited.
  */
 

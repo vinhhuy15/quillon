@@ -3,6 +3,7 @@ import { exportFile, type ExportFormat } from '../actions';
 import { useT, useTr, type StringKey } from '../i18n';
 import { toasts, ui, useEditor, useUi } from '../state/store';
 import { Icon } from './Icons';
+import { LOGO } from './TopBar';
 
 function Modal({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   useEffect(() => {
@@ -149,7 +150,14 @@ export function AboutDialog() {
   if (!open) return null;
   const close = () => ui.set({ aboutOpen: false });
   return (
-    <Modal title="SciForge 0.2.0" onClose={close} wide>
+    <Modal title={t('about')} onClose={close} wide>
+      <div className="about-head">
+        <img src={LOGO} alt="" />
+        <div>
+          <h2>Quillon</h2>
+          <p>{t('version')} 0.3.0 · Apache-2.0</p>
+        </div>
+      </div>
       <p className="about">{t('aboutText')}</p>
       <h3>{t('shortcuts')}</h3>
       <table className="shortcuts">
@@ -165,7 +173,7 @@ export function AboutDialog() {
         </tbody>
       </table>
       <div className="modal-actions">
-        <a className="btn" href="https://github.com/vinhhuy15/sciforge" target="_blank" rel="noreferrer">
+        <a className="btn" href="https://github.com/vinhhuy15/quillon" target="_blank" rel="noreferrer">
           GitHub
         </a>
         <button className="btn primary" onClick={close}>

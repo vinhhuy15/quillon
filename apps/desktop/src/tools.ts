@@ -1,4 +1,4 @@
-import type { ShapeKind } from '@sciforge/doc-model';
+import type { ShapeKind } from '@quillon/doc-model';
 import type { StringKey } from './i18n';
 import type { IconName } from './components/Icons';
 import { ui, type Tool } from './state/store';

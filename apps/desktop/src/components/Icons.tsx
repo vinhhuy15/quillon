@@ -1,4 +1,4 @@
-/** 16px line icons drawn for SciForge (currentColor, 1.4px strokes). */
+/** 16px line icons drawn for Quillon (currentColor, 1.4px strokes). */
 import type { ReactNode } from 'react';
 
 const P: Record<string, ReactNode> = {

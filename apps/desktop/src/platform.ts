@@ -153,7 +153,7 @@ export async function setWindowTitle(title: string) {
 }
 
 export const FILTERS = {
-  sci: { name: 'SciForge document', extensions: ['sci'], mime: 'application/x-sciforge' },
+  sci: { name: 'Quillon document', extensions: ['qln'], mime: 'application/x-quillon' },
   png: { name: 'PNG image', extensions: ['png'], mime: 'image/png' },
   svg: { name: 'SVG image', extensions: ['svg'], mime: 'image/svg+xml' },
   docx: {

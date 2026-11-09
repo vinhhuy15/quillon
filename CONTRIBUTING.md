@@ -1,6 +1,6 @@
-# Contributing to SciForge
+# Contributing to Quillon
 
-Thanks for your interest in SciForge!
+Thanks for your interest in Quillon!
 
 ## Setup
 

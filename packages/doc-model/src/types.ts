@@ -1,10 +1,12 @@
 /**
- * Core document schema for SciForge (.sci files).
+ * Core document schema for Quillon (.sci files).
  * The array order of `nodes` is the z-order (first = bottom).
  */
 
-export const SCHEMA_ID = 'sciforge/document';
-/** v1: math + text (SciForge 0.1). v2: shapes, lines/connectors, plots, symbols, groups (0.2). */
+export const SCHEMA_ID = 'quillon/document';
+/** Schema ids written by earlier versions of the app (it was called SciForge up to 0.2). */
+export const LEGACY_SCHEMA_IDS: readonly string[] = ['sciforge/document'];
+/** v1: math + text (Quillon 0.1). v2: shapes, lines/connectors, plots, symbols, groups (0.2). */
 export const SCHEMA_VERSION = 2;
 
 export type NodeId = string;
@@ -163,7 +165,7 @@ export interface DocumentMeta {
   title: string;
   created: string;
   modified: string;
-  /** App that last wrote the file, e.g. "SciForge 0.2.0". */
+  /** App that last wrote the file, e.g. "Quillon 0.3.0". */
   generator: string;
 }
 

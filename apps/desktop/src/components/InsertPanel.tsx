@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react';
-import { SHAPES, SYMBOL_CATEGORIES, SYMBOLS, shapeElement, symbolMarkup, type SymbolDef } from '@sciforge/figure-core';
-import type { ShapeKind } from '@sciforge/doc-model';
+import { SHAPES, SYMBOL_CATEGORIES, SYMBOLS, shapeElement, symbolMarkup, type SymbolDef } from '@quillon/figure-core';
+import type { ShapeKind } from '@quillon/doc-model';
 import { addSymbol, insertTemplate } from '../actions';
 import { useT, useTr } from '../i18n';
 import { library, useLibrary } from '../state/library';
@@ -40,7 +40,7 @@ export function InsertPanel() {
 
   const setTab = (id: PanelTab) => {
     ui.set({ panelTab: id });
-    persist('sciforge:panel-tab', id);
+    persist('quillon:panel-tab', id);
   };
 
   const groups = useMemo(
@@ -83,7 +83,7 @@ export function InsertPanel() {
                     className="tpl-card"
                     title={tr(it.title)}
                     draggable
-                    onDragStart={drag('application/x-sciforge-latex', it.latex)}
+                    onDragStart={drag('application/x-quillon-latex', it.latex)}
                     onClick={() => insertTemplate(it.latex)}
                   >
                     <MathIcon latex={it.latex} size={13} display maxWidth={210} maxHeight={64} />
@@ -106,7 +106,7 @@ export function InsertPanel() {
                       className={`tile${tool === `shape:${s.kind}` ? ' on' : ''}`}
                       title={`${tr(s.name)}${s.hint ? ` — ${tr(s.hint)}` : ''}\n${t('shapeTileHint')}`}
                       draggable
-                      onDragStart={drag('application/x-sciforge-shape', s.kind)}
+                      onDragStart={drag('application/x-quillon-shape', s.kind)}
                       onClick={() => setTool(`shape:${s.kind}`)}
                     >
                       <ShapePreview kind={s.kind} />
@@ -128,7 +128,7 @@ export function InsertPanel() {
                         className="tile"
                         title={tr(s.name)}
                         draggable
-                        onDragStart={drag('application/x-sciforge-symbol', s.id)}
+                        onDragStart={drag('application/x-quillon-symbol', s.id)}
                         onClick={() => addSymbol(s.id)}
                       >
                         <SymbolPreview def={s} />
@@ -148,7 +148,7 @@ export function InsertPanel() {
             <div className="tpl-list">
               {items.map((it) => (
                 <div key={it.id} className="tpl-card lib">
-                  <button className="tpl-insert" title={it.latex} draggable onDragStart={drag('application/x-sciforge-latex', it.latex)} onClick={() => insertTemplate(it.latex)}>
+                  <button className="tpl-insert" title={it.latex} draggable onDragStart={drag('application/x-quillon-latex', it.latex)} onClick={() => insertTemplate(it.latex)}>
                     <MathIcon latex={it.latex} size={13} display maxWidth={210} maxHeight={64} />
                   </button>
                   <button className="tpl-remove" title={t('remove')} aria-label={t('remove')} onClick={() => library.remove(it.id)}>

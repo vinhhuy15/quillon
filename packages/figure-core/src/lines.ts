@@ -1,6 +1,6 @@
 /** Lines, arrows and connectors: routing, arrow heads and attachment to other nodes. */
-import type { LineCap, LineNode, NodeId, Point, Rect, SciDocument, SciNode } from '@sciforge/doc-model';
-import { escapeXml } from '@sciforge/math-core';
+import type { LineCap, LineNode, NodeId, Point, Rect, SciDocument, SciNode } from '@quillon/doc-model';
+import { escapeXml } from '@quillon/math-core';
 import { boundsOf, dist, fmt, rayExit, rectCenter } from './geom';
 import { dashArray } from './shapes';
 

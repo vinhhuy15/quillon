@@ -13,8 +13,8 @@ import {
   parseDocument,
   removeNodes,
   type SciNode,
-} from '@sciforge/doc-model';
-import { parseXml, readSvgSource } from '@sciforge/math-core';
+} from '@quillon/doc-model';
+import { parseXml, readSvgSource } from '@quillon/math-core';
 import {
   attachGeometry,
   compileExpr,
@@ -317,12 +317,12 @@ describe('TikZ export', () => {
 
 describe('documents v2', () => {
   it('migrates v1 files and validates new node types', () => {
-    const v1 = { schema: 'sciforge/document', version: 1, nodes: [{ type: 'math', id: 'm', latex: 'x', x: 1, y: 2 }] };
+    const v1 = { schema: 'quillon/document', version: 1, nodes: [{ type: 'math', id: 'm', latex: 'x', x: 1, y: 2 }] };
     const d = parseDocument(v1);
     expect(d.version).toBe(2);
     expect(d.nodes[0].type).toBe('math');
     const v2 = parseDocument({
-      schema: 'sciforge/document',
+      schema: 'quillon/document',
       version: 2,
       nodes: [
         { type: 'shape', id: 's', shape: 'blob', width: -5, fill: 3 },
@@ -350,5 +350,16 @@ describe('documents v2', () => {
       expect(p.xMin).toBe(-6.5);
       expect(p.functions.length).toBe(1);
     }
+  });
+});
+
+describe('files from SciForge (the app before it was renamed)', () => {
+  it('opens sciforge/document files and reads legacy embedded sources', () => {
+    const d = parseDocument({ schema: 'sciforge/document', version: 2, nodes: [{ type: 'math', id: 'm', latex: 'x' }] });
+    expect(d.schema).toBe('quillon/document');
+    expect(d.nodes).toHaveLength(1);
+    const legacy = '<svg xmlns="http://www.w3.org/2000/svg"><metadata><sciforge:source xmlns:sciforge="https://sciforge.dev/ns/source/1">{"app":"sciforge","v":1,"latex":"E=mc^2","display":true,"fontSize":30,"color":"#000"}</sciforge:source></metadata></svg>';
+    expect(readSvgSource(legacy)?.latex).toBe('E=mc^2');
+    expect(() => parseDocument({ schema: 'other/document', version: 2, nodes: [] })).toThrow(/Not a Quillon/);
   });
 });

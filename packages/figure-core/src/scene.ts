@@ -2,8 +2,8 @@
  * Layout + SVG generation for every node type, shared by the canvas renderer and every exporter,
  * so what you see on screen is exactly what gets exported.
  */
-import type { MathNode, NodeId, Point, Rect, SciNode, SymbolNode } from '@sciforge/doc-model';
-import { escapeXml, layoutMath, makeSource, SOURCE_NS, type MathSource } from '@sciforge/math-core';
+import type { MathNode, NodeId, Point, Rect, SciNode, SymbolNode } from '@quillon/doc-model';
+import { escapeXml, layoutMath, makeSource, SOURCE_NS, type MathSource } from '@quillon/math-core';
 import { boundsOf, fmt, inflate, rectPolygon, rotatedBounds, rotatePoint } from './geom';
 import { lineGeometry, lineStrokeMarkup, type AttachGeometry } from './lines';
 import { plotMarkup } from './plot';
@@ -216,7 +216,7 @@ export function sceneToSvg(nodes: SciNode[], opts: SceneSvgOptions = {}): { svg:
   const origin = { x: b.x - pad, y: b.y - pad };
   const body = layouts.map((l) => nodeGroup(l, origin)).join('\n');
   const meta = opts.source
-    ? `<metadata><sciforge:source xmlns:sciforge="${SOURCE_NS}">${escapeXml(JSON.stringify(opts.source))}</sciforge:source></metadata>\n`
+    ? `<metadata><quillon:source xmlns:quillon="${SOURCE_NS}">${escapeXml(JSON.stringify(opts.source))}</quillon:source></metadata>\n`
     : '';
   const title = opts.title ? `<title>${escapeXml(opts.title)}</title>\n` : '';
   const bg = opts.background ? `<rect width="100%" height="100%" fill="${escapeXml(opts.background)}"/>\n` : '';

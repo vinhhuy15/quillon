@@ -21,7 +21,7 @@ jobs:
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
-          name: sciforge-web
+          name: quillon-web
           path: apps/desktop/dist
 
   desktop:
@@ -51,7 +51,7 @@ jobs:
       - run: npm run tauri -- build
       - uses: actions/upload-artifact@v4
         with:
-          name: sciforge-${{ matrix.os }}
+          name: quillon-${{ matrix.os }}
           path: |
             apps/desktop/src-tauri/target/release/bundle/**/*.msi
             apps/desktop/src-tauri/target/release/bundle/**/*.exe

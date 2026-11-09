@@ -2305,6 +2305,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "quillon"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2538,18 +2550,6 @@ dependencies = [
  "quote",
  "serde_derive_internals",
  "syn 2.0.119",
-]
-
-[[package]]
-name = "sciforge"
-version = "0.2.0"
-dependencies = [
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
 ]
 
 [[package]]

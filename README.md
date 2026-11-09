@@ -1,24 +1,24 @@
 <div align="center">
 
-<img src="apps/desktop/public/favicon.svg" width="72" height="72" alt="SciForge logo">
+<img src="apps/desktop/public/logo.svg" width="76" height="76" alt="Quillon logo">
 
-# SciForge
+# Quillon
 
 **Equations, diagrams and scientific figures in one open-source app**<br>
 for researchers, teachers and students
 
-[![CI](https://github.com/vinhhuy15/sciforge/actions/workflows/ci.yml/badge.svg)](https://github.com/vinhhuy15/sciforge/actions/workflows/ci.yml)
+[![CI](https://github.com/vinhhuy15/quillon/actions/workflows/ci.yml/badge.svg)](https://github.com/vinhhuy15/quillon/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.2.0-informational)
+![Version](https://img.shields.io/badge/version-0.3.0-0d7c6e)
 ![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-lightgrey)
 
 [Download](#download) · [How it works](#how-it-works) · [Features](#features) · [Build from source](#build-from-source) · [Roadmap](docs/ROADMAP.md)
 
 </div>
 
-![SciForge: a lab report with a circuit, numbered equations and a function plot](docs/images/overview.png)
+![Quillon: a lab report with a circuit, numbered equations and a function plot](docs/images/overview.png)
 
-SciForge combines what usually takes three tools: an equation editor in the spirit of MathType, a diagram
+Quillon combines what usually takes three tools: an equation editor in the spirit of MathType, a diagram
 editor for circuits, mechanics and flowcharts, and a plotter for functions. Everything lives on one page,
 renders with real TeX typography, and goes straight into **Word** (as native, editable equations) or
 **LaTeX** (as TikZ).
@@ -27,11 +27,17 @@ renders with real TeX typography, and goes straight into **Word** (as native, ed
 
 | Platform | |
 |---|---|
-| **Windows 10/11** | `SciForge_0.2.0_x64-setup.exe` from [Releases](https://github.com/vinhhuy15/sciforge/releases). Installs per user, no admin rights needed. |
-| **macOS / Linux** | `.dmg`, `.deb` and `.AppImage` builds come from CI (see [Actions](https://github.com/vinhhuy15/sciforge/actions)), or [build from source](#build-from-source). |
+| **Windows 10/11** | `Quillon_0.3.0_x64-setup.exe` from [Releases](https://github.com/vinhhuy15/quillon/releases). Installs per user, no admin rights needed. |
+| **macOS / Linux** | `.dmg`, `.deb` and `.AppImage` builds come from CI (see [Actions](https://github.com/vinhhuy15/quillon/actions)), or [build from source](#build-from-source). |
 | **Browser** | Run `npm run dev` and open `http://localhost:1420`. The whole app works in a modern browser. |
 
+> Quillon was called **SciForge** up to version 0.2. Documents and images made with SciForge open unchanged.
+
 ## How it works
+
+Open the app and the start card offers the four usual first steps:
+
+![The start card on an empty page](docs/images/welcome.png)
 
 ### 1. Write the math
 
@@ -61,7 +67,7 @@ The TikZ export compiles with plain `pdflatex`. Here is the page above, typeset 
 
 ![The same page compiled from the TikZ export](docs/images/tikz-output.png)
 
-Exported PNG and SVG files carry their source with them. Drop one back into SciForge and it becomes editable again.
+Exported PNG and SVG files carry their source with them. Drop one back into Quillon and it becomes editable again.
 
 ## Features
 
@@ -86,9 +92,9 @@ Exported PNG and SVG files carry their source with them. Drop one back into SciF
 
 | Format | What you get |
 |---|---|
-| `.sci` | SciForge document: an open ZIP + JSON format ([spec](docs/FILE_FORMAT.md)), with autosave and crash recovery |
-| PNG | 96–1200 DPI, transparent or white background; re-editable in SciForge |
-| SVG | Vector graphics; re-editable in SciForge |
+| `.qln` | Quillon document: an open ZIP + JSON format ([spec](docs/FILE_FORMAT.md)), with autosave and crash recovery. `.sci` files from SciForge open too |
+| PNG | 96–1200 DPI, transparent or white background; re-editable in Quillon |
+| SVG | Vector graphics; re-editable in Quillon |
 | Word `.docx` | Native equations (numbered with tab stops); drawings embedded as pictures |
 | TikZ `.tex` | Standalone picture for LaTeX papers; also *Copy TikZ* for pasting into an existing document |
 | LaTeX `.tex` | Article with equations, text and TikZ figures |
@@ -119,8 +125,8 @@ Exported PNG and SVG files carry their source with them. Drop one back into SciF
 Requires Node.js ≥ 20.
 
 ```bash
-git clone https://github.com/vinhhuy15/sciforge.git
-cd sciforge
+git clone https://github.com/vinhhuy15/quillon.git
+cd quillon
 npm install
 npm run dev          # http://localhost:1420
 ```
@@ -144,7 +150,7 @@ The README screenshots are produced by `node scripts/screenshots.mjs` while `npm
 ## Project layout
 
 ```
-packages/doc-model     Document schema, validation and migration, pure commands, undo/redo, .sci files
+packages/doc-model     Document schema, validation and migration, pure commands, undo/redo, .qln files
 packages/math-core     LaTeX → SVG/MathML (MathJax), MathML → OMML for Word, .docx writer, image metadata
 packages/figure-core   Layout of every object, shapes, connectors, symbols, plots, rich text, TikZ export
 apps/desktop           React app (MathLive editor); src-tauri/ is the Tauri 2 desktop shell
@@ -159,6 +165,7 @@ How the pieces fit together is described in [docs/ARCHITECTURE.md](docs/ARCHITEC
 |---|---|---|
 | ✅ | 0–1 · Foundation and equation editor | v0.1 |
 | ✅ | 2 · Drawing, diagrams, symbols, plots, TikZ | v0.2 |
+| ✅ | Identity · new name, logo, icon and design | v0.3 |
 | ⏭ | 3 · Constraint-based geometry and basic 3D | next |
 | | 4 · Figure composer, journal presets, image tools | |
 | | 5 · Data charts, curve fitting, plot digitizer | |

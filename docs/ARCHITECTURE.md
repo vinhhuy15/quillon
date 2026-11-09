@@ -16,7 +16,7 @@
   • pure commands, groups    • shapes, symbols (ports)     • MathML → OMML
   • History (undo/redo)      • lines: routing, arrows,     • .docx writer (text,
   • Editor + normalizer        connector resolution          equations, pictures)
-  • .sci zip container       • plots + expression parser   • Word clipboard HTML
+  • .qln zip container       • plots + expression parser   • Word clipboard HTML
                              • rich text ($…$ inline math) • PNG iTXt / SVG metadata
                              • sceneToSvg, sceneToTikz
 ```

@@ -6,7 +6,7 @@ export * from './png-meta';
 export * from './scene';
 export { parseXml, escapeXml, XmlParseError, type XmlElement, type XmlNode } from './xml';
 
-import type { MathNode } from '@sciforge/doc-model';
+import type { MathNode } from '@quillon/doc-model';
 import { latexToMathML } from './mathjax';
 import { mathmlToOmml } from './omml';
 

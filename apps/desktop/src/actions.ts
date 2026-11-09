@@ -11,6 +11,7 @@ import {
   createSymbolNode,
   createTextNode,
   decodeSci,
+  DOCUMENT_EXTENSIONS,
   encodeSci,
   expandGroups,
   groupNodes,
@@ -29,7 +30,7 @@ import {
   type SciDocument,
   type SciNode,
   type ShapeKind,
-} from '@sciforge/doc-model';
+} from '@quillon/doc-model';
 import {
   buildDocx,
   getPngTexts,
@@ -43,18 +44,19 @@ import {
   readSvgSource,
   setPngText,
   SOURCE_KEY,
+  LEGACY_SOURCE_KEYS,
   toPortableLatex,
   wordClipboardHtml,
   type DocxBlock,
   type MathSource,
-} from '@sciforge/math-core';
-import { boundsOf, getSymbol, inflate, isBlankNode, mathToSvg, rectPolygon, richToLatex, sceneToSvg, sceneToTikz } from '@sciforge/figure-core';
+} from '@quillon/math-core';
+import { boundsOf, getSymbol, inflate, isBlankNode, mathToSvg, rectPolygon, richToLatex, sceneToSvg, sceneToTikz } from '@quillon/figure-core';
 import { t } from './i18n';
 import { getNumbers, measureText, nodeBounds } from './layout';
 import { FILTERS, openFile, saveFile, type FileFilter } from './platform';
 import { editor, toast, ui } from './state/store';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 // ------------------------------------------------------------------ viewport
 
@@ -363,7 +365,7 @@ function plainTextOf(nodes: SciNode[]): string {
     .map((n) => (n.type === 'math' ? toPortableLatex(n.latex) : n.type === 'text' ? n.text : ''))
     .filter(Boolean)
     .join('\n');
-  return text || `[SciForge: ${nodes.length} object${nodes.length > 1 ? 's' : ''}]`;
+  return text || `[Quillon: ${nodes.length} object${nodes.length > 1 ? 's' : ''}]`;
 }
 
 /** Handles the DOM `copy`/`cut` event (keyboard shortcuts). */
@@ -409,7 +411,7 @@ export function pasteText(text: string, at?: Point) {
   const trimmed = text.trim();
   if (!trimmed) return;
   if (trimmed.startsWith('<svg') || trimmed.startsWith('<?xml')) {
-    const nodes = /<sciforge:nodes[^>]*>([\s\S]*?)<\/sciforge:nodes>/.exec(trimmed);
+    const nodes = NODES_META.exec(trimmed);
     if (nodes) return insertNodesJson(decodeXmlText(nodes[1]), at);
     const src = readSvgSource(trimmed);
     if (src) return insertFromSource(src, at);
@@ -508,7 +510,7 @@ export function fileNew() {
 }
 
 const OPEN_FILTERS: FileFilter[] = [
-  { name: 'SciForge / PNG / SVG', extensions: ['sci', 'png', 'svg', 'json'], mime: 'application/x-sciforge' },
+  { name: 'Quillon / PNG / SVG', extensions: [...DOCUMENT_EXTENSIONS, 'png', 'svg', 'json'], mime: 'application/x-quillon' },
 ];
 
 export async function fileOpen() {
@@ -533,9 +535,9 @@ export async function fileSave(saveAs = false): Promise<boolean> {
   const st = editor.getState();
   const doc = st.doc;
   try {
-    const bytes = encodeSci({ ...doc, meta: { ...doc.meta, generator: `SciForge ${VERSION}` } }, { previewSvg: previewSvg(doc) });
-    const base = (st.fileName ?? `${doc.meta.title || t('untitled')}.sci`).replace(/\.\w+$/, '');
-    const res = await saveFile(bytes, { suggestedName: `${base}.sci`, filter: FILTERS.sci, path: saveAs ? null : st.filePath });
+    const bytes = encodeSci({ ...doc, meta: { ...doc.meta, generator: `Quillon ${VERSION}` } }, { previewSvg: previewSvg(doc) });
+    const base = (st.fileName ?? `${doc.meta.title || t('untitled')}.qln`).replace(/\.\w+$/, '');
+    const res = await saveFile(bytes, { suggestedName: `${base}.qln`, filter: FILTERS.sci, path: saveAs ? null : st.filePath });
     if (!res) return false;
     editor.markSaved(res);
     toast(`${t('saved')}: ${res.name}`, 'success');
@@ -557,24 +559,28 @@ export async function importBytes(name: string, bytes: Uint8Array, at?: Point, p
   const lower = name.toLowerCase();
   if (isPng(bytes)) {
     const texts = getPngTexts(bytes);
-    const nodesJson = texts[`${SOURCE_KEY}-nodes`];
+    const keys = [SOURCE_KEY, ...LEGACY_SOURCE_KEYS];
+    const nodesJson = keys.map((k) => texts[`${k}-nodes`]).find(Boolean);
     if (nodesJson) return insertNodesJson(nodesJson, at);
-    const src = parseSource(texts[SOURCE_KEY]);
+    const src = parseSource(keys.map((k) => texts[k]).find(Boolean));
     return src ? insertFromSource(src, at) : toast(t('imageNoSource'), 'error');
   }
   if (lower.endsWith('.svg')) {
     const text = new TextDecoder().decode(bytes);
-    const nodesMatch = /<sciforge:nodes[^>]*>([\s\S]*?)<\/sciforge:nodes>/.exec(text);
+    const nodesMatch = NODES_META.exec(text);
     if (nodesMatch) return insertNodesJson(decodeXmlText(nodesMatch[1]), at);
     const src = readSvgSource(text);
     return src ? insertFromSource(src, at) : toast(t('imageNoSource'), 'error');
   }
   if (!confirmDiscard()) return;
   const doc = decodeSci(bytes);
-  editor.load(doc, { name, path: lower.endsWith('.sci') ? path : null });
+  editor.load(doc, { name: name.replace(/\.sci$/i, '.qln'), path: lower.endsWith('.qln') ? path : null });
   ui.set({ activeMathId: null, editingTextId: null });
   requestAnimationFrame(zoomFit);
 }
+
+/** Multi-object source embedded in SVG exports (SciForge files used the sciforge: prefix). */
+const NODES_META = /<(?:quillon|sciforge):nodes[^>]*>([\s\S]*?)<\/(?:quillon|sciforge):nodes>/;
 
 const decodeXmlText = (s: string) =>
   s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
@@ -613,7 +619,7 @@ function scopeSvg(nodes: SciNode[], background: string | null) {
     const esc = fragmentJson(nodes).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     res.svg = res.svg.replace(
       /(<svg[^>]*>\n)/,
-      `$1<metadata><sciforge:nodes xmlns:sciforge="https://sciforge.dev/ns/source/1">${esc}</sciforge:nodes></metadata>\n`,
+      `$1<metadata><quillon:nodes xmlns:quillon="https://quillon.app/ns/source/1">${esc}</quillon:nodes></metadata>\n`,
     );
   }
   return res;
@@ -653,7 +659,7 @@ async function scopePng(nodes: SciNode[], dpi: number, background: string | null
   png = single
     ? setPngText(png, SOURCE_KEY, JSON.stringify(makeSource(single)))
     : setPngText(png, `${SOURCE_KEY}-nodes`, fragmentJson(nodes));
-  return setPngText(png, 'Software', `SciForge ${VERSION}`);
+  return setPngText(png, 'Software', `Quillon ${VERSION}`);
 }
 
 type Block = { kind: 'node'; node: Extract<SciNode, { type: 'math' | 'text' }> } | { kind: 'figure'; nodes: SciNode[]; box: Rect };
@@ -708,7 +714,7 @@ function buildTex(nodes: SciNode[]): string {
     })
     .join('\n');
   return [
-    `% Generated by SciForge ${VERSION}`,
+    `% Generated by Quillon ${VERSION}`,
     '\\documentclass{article}',
     '\\usepackage[utf8]{inputenc}',
     '\\usepackage{amsmath,amssymb,amsfonts,mathtools}',
@@ -757,7 +763,7 @@ async function buildDocxBytes(nodes: SciNode[]): Promise<Uint8Array> {
   for (const b of documentBlocks(nodes)) {
     if (b.kind === 'figure') {
       const s = sceneToSvg(b.nodes, { numbers: nums, measure: measureText, padding: 8 });
-      blocks.push({ kind: 'image', png: await rasterize(s.svg, s.width, s.height, 3, '#ffffff'), width: s.width, height: s.height, alt: 'SciForge figure' });
+      blocks.push({ kind: 'image', png: await rasterize(s.svg, s.width, s.height, 3, '#ffffff'), width: s.width, height: s.height, alt: 'Quillon figure' });
       continue;
     }
     const n = b.node;
@@ -787,7 +793,7 @@ export async function exportFile(req: ExportRequest): Promise<boolean> {
     toast(t('emptyDoc'), 'error');
     return false;
   }
-  const base = (editor.getState().fileName ?? editor.doc.meta.title ?? 'sciforge').replace(/\.\w+$/, '') || 'sciforge';
+  const base = (editor.getState().fileName ?? editor.doc.meta.title ?? 'quillon').replace(/\.\w+$/, '') || 'quillon';
   try {
     let bytes: Uint8Array;
     const enc = new TextEncoder();
@@ -824,7 +830,7 @@ export async function exportFile(req: ExportRequest): Promise<boolean> {
 
 // ------------------------------------------------------------------ autosave
 
-const AUTOSAVE_KEY = 'sciforge:autosave';
+const AUTOSAVE_KEY = 'quillon:autosave';
 let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
 
 export function startAutosave() {

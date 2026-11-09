@@ -1,17 +1,20 @@
 /**
  * Equation layout (LaTeX → positioned SVG) and the editable-source metadata embedded in exports.
- * Scene layout for all node types lives in @sciforge/figure-core.
+ * Scene layout for all node types lives in @quillon/figure-core.
  */
-import type { MathNode } from '@sciforge/doc-model';
+import type { MathNode } from '@quillon/doc-model';
 import { latexToSvg, LatexError } from './mathjax';
 import { escapeXml, findFirst, localName, parseXml, textContent } from './xml';
 
-export const SOURCE_KEY = 'sciforge';
-export const SOURCE_NS = 'https://sciforge.dev/ns/source/1';
+export const SOURCE_KEY = 'quillon';
+export const SOURCE_NS = 'https://quillon.app/ns/source/1';
+/** Written by SciForge 0.1–0.2; still read so old exports stay editable. */
+export const LEGACY_SOURCE_KEYS: readonly string[] = ['sciforge'];
+export const LEGACY_SOURCE_NS: readonly string[] = ['https://sciforge.dev/ns/source/1'];
 
 /** Editable source embedded in exported PNG/SVG files (round-trip editing). */
 export interface MathSource {
-  app: 'sciforge';
+  app: 'quillon';
   v: 1;
   latex: string;
   display: boolean;
@@ -20,16 +23,16 @@ export interface MathSource {
 }
 
 export function makeSource(n: Pick<MathNode, 'latex' | 'display' | 'fontSize' | 'color'>): MathSource {
-  return { app: 'sciforge', v: 1, latex: n.latex, display: n.display, fontSize: n.fontSize, color: n.color };
+  return { app: 'quillon', v: 1, latex: n.latex, display: n.display, fontSize: n.fontSize, color: n.color };
 }
 
 export function parseSource(json: string | undefined | null): MathSource | null {
   if (!json) return null;
   try {
     const o = JSON.parse(json);
-    if (o?.app !== 'sciforge' || typeof o.latex !== 'string') return null;
+    if ((o?.app !== 'quillon' && !LEGACY_SOURCE_KEYS.includes(o?.app)) || typeof o.latex !== 'string') return null;
     return {
-      app: 'sciforge',
+      app: 'quillon',
       v: 1,
       latex: o.latex,
       display: o.display !== false,
@@ -92,11 +95,12 @@ export function layoutMath(latex: string, display: boolean, fontSize: number, co
 
 const fmt = (n: number) => (Math.round(n * 1000) / 1000).toString();
 
-/** Extract embedded SciForge source from an SVG document, if present. */
+/** Extract embedded Quillon source from an SVG document, if present. */
 export function readSvgSource(svgText: string): MathSource | null {
   try {
     const root = parseXml(svgText);
-    const el = findFirst(root, (e) => localName(e) === 'source' && Object.values(e.attrs).includes(SOURCE_NS));
+    const ns = [SOURCE_NS, ...LEGACY_SOURCE_NS];
+    const el = findFirst(root, (e) => localName(e) === 'source' && Object.values(e.attrs).some((v) => ns.includes(v)));
     return el ? parseSource(textContent(el)) : null;
   } catch {
     return null;

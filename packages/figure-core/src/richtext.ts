@@ -2,8 +2,8 @@
  * Text with inline math: `The energy $E=mc^2$ is…`. Used by text nodes, shape/symbol labels,
  * line labels and plot legends. `\$` is a literal dollar sign.
  */
-import { escapeXml, latexToSvg } from '@sciforge/math-core';
-import type { TextAlign } from '@sciforge/doc-model';
+import { escapeXml, latexToSvg } from '@quillon/math-core';
+import type { TextAlign } from '@quillon/doc-model';
 import { fmt } from './geom';
 
 export type TextMeasurer = (text: string, font: string) => number;

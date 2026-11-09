@@ -2,15 +2,15 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "sciforge-web",
+      "name": "quillon-web",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 1420
     },
     {
-      "name": "sciforge-preview",
+      "name": "quillon-preview",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview", "-w", "@sciforge/desktop", "--", "--port", "4173", "--strictPort"],
+      "runtimeArgs": ["run", "preview", "-w", "@quillon/desktop", "--", "--port", "4173", "--strictPort"],
       "port": 4173
     }
   ]

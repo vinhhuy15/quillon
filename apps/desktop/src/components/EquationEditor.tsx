@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MathfieldElement } from 'mathlive';
-import { addNodes, createMathNode, updateNodes, type MathNode } from '@sciforge/doc-model';
-import { validateLatex } from '@sciforge/math-core';
+import { addNodes, createMathNode, updateNodes, type MathNode } from '@quillon/doc-model';
+import { validateLatex } from '@quillon/math-core';
 import { copyForWord, editorInsertHook, viewCenter } from '../actions';
 import { useT } from '../i18n';
 import { library } from '../state/library';

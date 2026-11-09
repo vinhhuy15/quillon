@@ -1,10 +1,11 @@
-# `.sci` file format (v2)
+# `.qln` file format (v2)
 
-A `.sci` file is a ZIP archive:
+A `.qln` file is a ZIP archive. Files from SciForge (Quillon's name up to 0.2) use the `.sci` extension,
+the `sciforge/document` schema id and the `application/x-sciforge` mimetype; Quillon reads them unchanged.
 
 | Entry | Content |
 |---|---|
-| `mimetype` | `application/x-sciforge` (stored, uncompressed, first) |
+| `mimetype` | `application/x-quillon` (stored, uncompressed, first) |
 | `document.json` | The document (below) |
 | `preview.svg` | Optional preview of the whole page |
 
@@ -12,9 +13,9 @@ Readers also accept a bare `document.json`.
 
 ```jsonc
 {
-  "schema": "sciforge/document",
+  "schema": "quillon/document",
   "version": 2,
-  "meta": { "title": "…", "created": "ISO-8601", "modified": "ISO-8601", "generator": "SciForge 0.2.0" },
+  "meta": { "title": "…", "created": "ISO-8601", "modified": "ISO-8601", "generator": "Quillon 0.3.0" },
   "settings": { "defaultFontSize": 28, "defaultColor": "#1f2937" },
   "nodes": [                      // array order = z-order (first is bottom)
     { "id": "m_…", "type": "math", "x": 100, "y": 80,
@@ -26,7 +27,7 @@ Readers also accept a bare `document.json`.
 ```
 
 Coordinates are CSS pixels at 100 % zoom. Unknown node types are skipped on load (forward compatibility);
-files with a higher `version` are rejected with a clear message. Version 1 files (SciForge 0.1) open unchanged.
+files with a higher `version` are rejected with a clear message. Version 1 files (Quillon 0.1) open unchanged.
 
 ## Node types added in v2
 
@@ -64,8 +65,8 @@ Line end points are always stored resolved, so a reader that ignores `start`/`en
 
 ## Embedded source in exported images
 
-- **PNG**: an `iTXt` chunk with keyword `sciforge` holding
-  `{"app":"sciforge","v":1,"latex":"…","display":true,"fontSize":28,"color":"#…"}`;
-  multi-object exports use keyword `sciforge-nodes` with a fragment document (same JSON as above).
-- **SVG**: `<metadata><sciforge:source xmlns:sciforge="https://sciforge.dev/ns/source/1">{…}</sciforge:source></metadata>`
-  (or `sciforge:nodes` for multiple objects).
+- **PNG**: an `iTXt` chunk with keyword `quillon` holding
+  `{"app":"quillon","v":1,"latex":"…","display":true,"fontSize":28,"color":"#…"}`;
+  multi-object exports use keyword `quillon-nodes` with a fragment document (same JSON as above).
+- **SVG**: `<metadata><quillon:source xmlns:quillon="https://quillon.app/ns/source/1">{…}</quillon:source></metadata>`
+  (or `quillon:nodes` for multiple objects).

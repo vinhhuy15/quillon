@@ -1,6 +1,6 @@
 /**
- * .sci container: a ZIP archive with
- *   mimetype        "application/x-sciforge" (stored, first entry)
+ * .qln container (formerly .sci): a ZIP archive with
+ *   mimetype        "application/x-quillon" (stored, first entry)
  *   document.json   the SciDocument
  *   preview.svg     optional preview image
  * Plain JSON documents are also accepted on read.
@@ -9,8 +9,10 @@ import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { DocumentFormatError, parseDocument, serializeDocument } from './document';
 import type { SciDocument } from './types';
 
-export const SCI_MIME = 'application/x-sciforge';
-export const SCI_EXTENSION = 'sci';
+export const SCI_MIME = 'application/x-quillon';
+export const SCI_EXTENSION = 'qln';
+/** Extensions that open as documents: the current one and SciForge's. */
+export const DOCUMENT_EXTENSIONS: readonly string[] = ['qln', 'sci'];
 
 export interface SciExtras {
   previewSvg?: string;
@@ -35,7 +37,7 @@ export function decodeSci(bytes: Uint8Array): SciDocument {
       throw new DocumentFormatError('File is damaged (cannot unzip)');
     }
     const json = entries['document.json'];
-    if (!json) throw new DocumentFormatError('document.json missing from .sci file');
+    if (!json) throw new DocumentFormatError('document.json missing from the file');
     return parseJson(strFromU8(json));
   }
   return parseJson(strFromU8(bytes));
@@ -46,7 +48,7 @@ function parseJson(text: string): SciDocument {
   try {
     raw = JSON.parse(text);
   } catch {
-    throw new DocumentFormatError('File is not a valid SciForge document');
+    throw new DocumentFormatError('File is not a valid Quillon document');
   }
   return parseDocument(raw);
 }

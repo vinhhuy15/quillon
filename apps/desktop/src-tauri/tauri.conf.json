@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "SciForge",
-  "version": "0.2.0",
-  "identifier": "dev.sciforge.desktop",
+  "productName": "Quillon",
+  "version": "0.3.0",
+  "identifier": "app.quillon.desktop",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "SciForge",
+        "title": "Quillon",
         "width": 1360,
         "height": 860,
         "minWidth": 900,
@@ -29,8 +29,8 @@
     "targets": "all",
     "category": "Education",
     "shortDescription": "Math editor and scientific figure toolkit",
-    "longDescription": "SciForge is an open-source toolkit for researchers and students: an equation editor with Word/LaTeX export, drawing and diagrams, scientific symbol libraries, function plots and TikZ export.",
-    "copyright": "Copyright © SciForge contributors. Apache-2.0.",
+    "longDescription": "Quillon is an open-source toolkit for researchers and students: an equation editor with Word/LaTeX export, drawing and diagrams, scientific symbol libraries, function plots and TikZ export.",
+    "copyright": "Copyright © Quillon contributors. Apache-2.0.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -40,10 +40,10 @@
     ],
     "fileAssociations": [
       {
-        "ext": ["sci"],
-        "name": "SciForge document",
-        "description": "SciForge document",
-        "mimeType": "application/x-sciforge",
+        "ext": ["qln", "sci"],
+        "name": "Quillon document",
+        "description": "Quillon document",
+        "mimeType": "application/x-quillon",
         "role": "Editor"
       }
     ]

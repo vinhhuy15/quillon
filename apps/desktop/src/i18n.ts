@@ -103,8 +103,21 @@ const EN = {
   remove: 'Remove',
   search: 'Search',
   // canvas
-  emptyTitle: 'Start with an equation, a shape or a plot',
-  emptyHint: 'Double-click anywhere to type an equation, pick a tool on the left, or drag a template or symbol in.',
+  wTitle: 'Welcome to Quillon',
+  wSubtitle: 'Equations, diagrams and figures on one page.',
+  wEquation: 'Write an equation',
+  wEquationHint: 'Type math or LaTeX',
+  wDiagram: 'Draw a diagram',
+  wDiagramHint: 'Shapes and symbols',
+  wPlot: 'Plot a function',
+  wPlotHint: 'Curves and axes',
+  wOpen: 'Open a file',
+  wOpenHint: '.qln, PNG or SVG',
+  wTip: 'Tip: double-click anywhere on the page to start typing math.',
+  stateSaved: 'Saved',
+  stateEdited: 'Edited',
+  about: 'About Quillon',
+  version: 'Version',
   // inspector
   properties: 'Properties',
   objects: 'objects',
@@ -191,8 +204,8 @@ const EN = {
   cancel: 'Cancel',
   exportBtn: 'Export',
   exported: 'Exported',
-  fmtPng: 'Picture for slides and documents; re-editable in SciForge',
-  fmtSvg: 'Vector graphics; re-editable in SciForge',
+  fmtPng: 'Picture for slides and documents; re-editable in Quillon',
+  fmtSvg: 'Vector graphics; re-editable in Quillon',
   fmtDocx: 'Native Word equations; drawings as pictures',
   fmtTikz: 'Standalone TikZ picture for LaTeX papers',
   fmtTex: 'LaTeX document: equations, text and TikZ figures',
@@ -206,10 +219,10 @@ const EN = {
   restored: 'Restored your previous session',
   importedEquation: 'Imported an editable equation',
   importedObjects: 'Imported editable objects',
-  imageNoSource: 'This image has no SciForge source',
+  imageNoSource: 'This image has no Quillon source',
   // about
   aboutText:
-    'SciForge is an open-source toolkit for equations and scientific figures, for researchers, teachers and students. Apache-2.0 licensed.',
+    'Quillon is an open-source toolkit for equations and scientific figures, for researchers, teachers and students. Apache-2.0 licensed.',
   shortcuts: 'Keyboard shortcuts',
   close: 'Close',
 } satisfies Record<string, string>;
@@ -246,7 +259,7 @@ export function useTr(): (text: string) => string {
 export function setLang(lang: Lang) {
   ui.set({ lang });
   try {
-    localStorage.setItem('sciforge:lang', lang);
+    localStorage.setItem('quillon:lang', lang);
   } catch {
     /* ignore */
   }

@@ -161,7 +161,7 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
           checked: snap,
           onClick: () => {
             ui.set({ snap: !snap });
-            persist('sciforge:snap', snap ? 'off' : 'on');
+            persist('quillon:snap', snap ? 'off' : 'on');
           },
         },
         { label: t('insertPanel'), kbd: 'Ctrl+\\', checked: panelOpen, onClick: togglePanel },
@@ -182,13 +182,13 @@ function useMenus(): { id: string; label: string; items: MenuItem[] }[] {
 export function togglePanel() {
   const open = !ui.get().panelOpen;
   ui.set({ panelOpen: open });
-  persist('sciforge:panel', open ? 'open' : 'closed');
+  persist('quillon:panel', open ? 'open' : 'closed');
 }
 
 export function toggleDock() {
   const open = !ui.get().dockOpen;
   ui.set({ dockOpen: open });
-  persist('sciforge:dock', open ? 'open' : 'closed');
+  persist('quillon:dock', open ? 'open' : 'closed');
 }
 
 function MenuBar() {
@@ -239,6 +239,8 @@ function BarButton({ icon, label, kbd, onClick, disabled, children }: { icon: Pa
   );
 }
 
+export const LOGO = `${import.meta.env.BASE_URL}logo.svg`;
+
 export function TopBar() {
   const t = useT();
   const { canUndo, canRedo, undoLabel, redoLabel, fileName, dirty, doc } = useEditor();
@@ -246,16 +248,13 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="brand">
-        <svg viewBox="0 0 64 64" width="18" height="18" aria-hidden>
-          <rect width="64" height="64" rx="14" fill="#3b3fb6" />
-          <path d="M18 16h28v6H27l12 10-12 10h19v6H18v-5l13-11-13-11z" fill="#fff" />
-        </svg>
-        <span>SciForge</span>
+        <img src={LOGO} alt="" />
+        <span className="wordmark">Quillon</span>
       </div>
       <MenuBar />
       <div className="doc-name" title={name}>
-        {name}
-        {dirty && <span className="dirty" title={t('unsaved')} />}
+        <span className="doc-title">{name}</span>
+        <span className={`save-state${dirty ? ' dirty' : ''}`}>{dirty ? t('stateEdited') : t('stateSaved')}</span>
       </div>
       <div className="topbar-actions">
         <BarButton icon="undo" label={undoLabel ? `${t('undo')}: ${undoLabel}` : t('undo')} kbd="Ctrl+Z" onClick={() => editor.undo()} disabled={!canUndo} />

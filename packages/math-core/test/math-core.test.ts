@@ -132,10 +132,10 @@ describe('scene + exports', () => {
     // 1x1 transparent PNG
     const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
     const png = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const tagged = setPngText(png, 'sciforge', '{"latex":"\\\\int ∂x"}');
-    expect(getPngTexts(tagged).sciforge).toBe('{"latex":"\\\\int ∂x"}');
-    const again = setPngText(tagged, 'sciforge', 'v2');
-    expect(getPngTexts(again)).toEqual({ sciforge: 'v2' });
+    const tagged = setPngText(png, 'quillon', '{"latex":"\\\\int ∂x"}');
+    expect(getPngTexts(tagged).quillon).toBe('{"latex":"\\\\int ∂x"}');
+    const again = setPngText(tagged, 'quillon', 'v2');
+    expect(getPngTexts(again)).toEqual({ quillon: 'v2' });
     expect(again.length).toBeLessThan(tagged.length);
   });
 

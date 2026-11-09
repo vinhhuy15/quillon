@@ -7,7 +7,7 @@ export function Palette({ onInsert }: { onInsert: (latex: string) => void }) {
   const tr = useTr();
   const [tab, setTab] = useState(() => {
     try {
-      return localStorage.getItem('sciforge:palette-tab') ?? PALETTES[0].id;
+      return localStorage.getItem('quillon:palette-tab') ?? PALETTES[0].id;
     } catch {
       return PALETTES[0].id;
     }
@@ -17,7 +17,7 @@ export function Palette({ onInsert }: { onInsert: (latex: string) => void }) {
   const choose = (id: string) => {
     setTab(id);
     try {
-      localStorage.setItem('sciforge:palette-tab', id);
+      localStorage.setItem('quillon:palette-tab', id);
     } catch {
       /* ignore */
     }

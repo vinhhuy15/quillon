@@ -1,6 +1,6 @@
 /** Basic and flowchart shapes: SVG outline + polygon for connector attachment. */
-import type { Dash, ShapeKind } from '@sciforge/doc-model';
-import type { Point } from '@sciforge/doc-model';
+import type { Dash, ShapeKind } from '@quillon/doc-model';
+import type { Point } from '@quillon/doc-model';
 import { fmt } from './geom';
 
 export interface ShapeInfo {

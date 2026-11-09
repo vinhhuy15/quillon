@@ -65,7 +65,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    setWindowTitle(`${dirty ? '• ' : ''}${fileName ?? (title || t('untitled', lang))} — SciForge`);
+    setWindowTitle(`${dirty ? '• ' : ''}${fileName ?? (title || t('untitled', lang))} — Quillon`);
     document.documentElement.lang = lang;
   }, [fileName, dirty, lang, title]);
 

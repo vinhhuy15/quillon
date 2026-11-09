@@ -1,4 +1,5 @@
 import {
+  LEGACY_SCHEMA_IDS,
   SCHEMA_ID,
   SCHEMA_VERSION,
   type Binding,
@@ -21,8 +22,8 @@ import {
   type TextNode,
 } from './types';
 
-export const APP_NAME = 'SciForge';
-export const APP_VERSION = '0.2.0';
+export const APP_NAME = 'Quillon';
+export const APP_VERSION = '0.3.0';
 
 export const DEFAULT_FONT = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif';
 export const INK = '#1f2937';
@@ -345,12 +346,14 @@ function normalizeNode(raw: unknown, seen: Set<string>): SciNode | null {
  */
 export function parseDocument(raw: unknown): SciDocument {
   if (!isObj(raw)) throw new DocumentFormatError('Document is not a JSON object');
-  if (raw.schema !== SCHEMA_ID) throw new DocumentFormatError('Not a SciForge document');
+  if (raw.schema !== SCHEMA_ID && !LEGACY_SCHEMA_IDS.includes(raw.schema as string)) {
+    throw new DocumentFormatError('Not a Quillon document');
+  }
   const version = num(raw.version, 0);
   if (version < 1) throw new DocumentFormatError(`Unsupported document version ${version}`);
   if (version > SCHEMA_VERSION) {
     throw new DocumentFormatError(
-      `This file was made with a newer SciForge (format v${version}); please update the app.`,
+      `This file was made with a newer Quillon (format v${version}); please update the app.`,
     );
   }
   const migrated = migrate(raw, version);

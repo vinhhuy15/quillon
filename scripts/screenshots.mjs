@@ -11,7 +11,7 @@ const OUT = new globalThis.URL('../docs/images/', import.meta.url);
 mkdirSync(OUT, { recursive: true });
 
 const port = 9333;
-const profile = mkdtempSync(join(tmpdir(), 'sciforge-shots-'));
+const profile = mkdtempSync(join(tmpdir(), 'quillon-shots-'));
 const chrome = spawn(CHROME, [`--headless=new`, `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--hide-scrollbars', '--force-color-profile=srgb', 'about:blank'], { stdio: 'ignore' });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -28,6 +28,8 @@ let seq = 0;
 const pending = new Map();
 ws.onmessage = (m) => {
   const msg = JSON.parse(m.data);
+  // Never let a beforeunload prompt block navigation.
+  if (msg.method === 'Page.javascriptDialogOpening') ws.send(JSON.stringify({ id: ++seq, method: 'Page.handleJavaScriptDialog', params: { accept: true } }));
   if (msg.id && pending.has(msg.id)) {
     pending.get(msg.id)(msg);
     pending.delete(msg.id);
@@ -49,12 +51,18 @@ async function shot(name, width, height, setup) {
   await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 2, mobile: false });
   await send('Page.navigate', { url: URL });
   await sleep(2500);
-  await run(PRELUDE + setup);
+  try {
+    await run(PRELUDE + setup);
+  } catch (e) {
+    const info = await run(`const S = window.__quillon.store; return { title: document.title, docTitle: S.editor.doc.meta.title, nodes: S.editor.doc.nodes.length, age: Math.round(performance.now()) }`).catch((x) => String(x));
+    console.error('setup failed for', name, info);
+    throw e;
+  }
   await sleep(1200);
   const { data } = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(new globalThis.URL(`${name}.png`, OUT), Buffer.from(data, 'base64'));
-  // No "restored your session" toast on the next load.
-  await run(`localStorage.clear(); window.onbeforeunload = null;`);
+  // No "restored your session" toast and no "leave site?" prompt on the next load.
+  await run(`const S = window.__quillon.store; S.editor.markSaved({ name: null, path: null }); localStorage.clear();`);
   console.log('wrote', name);
 }
 
@@ -62,9 +70,9 @@ await send('Page.enable');
 await send('Runtime.enable');
 
 const PRELUDE = `
-const S = await import('/src/state/store.ts');
-const A = await import('/src/actions.ts');
-const D = await import('/@id/@sciforge/doc-model');
+const Q = window.__quillon; const S = Q.store;
+const A = Q.actions;
+const D = Q.doc;
 const { editor, ui } = S;
 S.toasts.set({ list: [] });
 const place = (n, p) => editor.apply('place', (d) => D.updateNodes(d, { [n.id]: p }));
@@ -105,6 +113,12 @@ ui.set({ activeMathId: null });
 view(0.95, 40, 40);
 await settle();
 `;
+
+await shot('welcome', 1440, 900, `
+fresh('Untitled');
+ui.set({ panelOpen: true, panelTab: 'templates' });
+await settle(true);
+`);
 
 await shot('overview', 1440, 900, RC);
 
@@ -188,11 +202,11 @@ if (process.env.TIKZ_OUT) {
   await send('Page.navigate', { url: URL });
   await sleep(2500);
   const tikz = await run(PRELUDE + RC + `
-    const F = await import('/@id/@sciforge/figure-core');
-    const L = await import('/src/layout.ts');
+    const F = Q.figure;
+    const L = Q.layout;
     return F.sceneToTikz(editor.doc.nodes, { numbers: L.getNumbers(editor.doc), measure: L.measureText });`);
   writeFileSync(join(process.env.TIKZ_OUT, 'rc.tex'), tikz);
-  await run(`localStorage.clear(); window.onbeforeunload = null;`);
+  await run(`const S = window.__quillon.store; S.editor.markSaved({ name: null, path: null }); localStorage.clear();`);
   console.log('wrote rc.tex');
 }
 

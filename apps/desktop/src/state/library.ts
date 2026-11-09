@@ -7,7 +7,7 @@ export interface LibraryItem {
   added: number;
 }
 
-const KEY = 'sciforge:library';
+const KEY = 'quillon:library';
 
 function load(): LibraryItem[] {
   try {

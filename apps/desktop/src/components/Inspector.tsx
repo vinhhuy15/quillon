@@ -17,8 +17,8 @@ import {
   type ShapeNode,
   type SymbolNode,
   type TextNode,
-} from '@sciforge/doc-model';
-import { checkExpr, getSymbol, SHAPES } from '@sciforge/figure-core';
+} from '@quillon/doc-model';
+import { checkExpr, getSymbol, SHAPES } from '@quillon/figure-core';
 import {
   align,
   copyForWord,
@@ -125,7 +125,7 @@ function DocumentSection() {
           label={t('snapToGrid')}
           onChange={(v) => {
             ui.set({ snap: v });
-            persist('sciforge:snap', v ? 'on' : 'off');
+            persist('quillon:snap', v ? 'on' : 'off');
           }}
         />
       </Section>
