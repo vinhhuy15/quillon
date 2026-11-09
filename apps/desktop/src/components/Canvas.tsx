@@ -269,6 +269,8 @@ export function Canvas() {
 
     // Drawing tools
     if (tool !== 'select') {
+      // The click must not move focus to the page, or the new editor loses it right away.
+      if (tool === 'math' || tool === 'text') e.preventDefault();
       if (tool === 'math') {
         addMath('', { x: snapValue(p.x), y: snapValue(p.y - 20) });
         return finishTool();
@@ -624,16 +626,22 @@ function TextEditor({ node, zoom, panX, panY }: { node: TextNode | ShapeNode; zo
   const [value, setValue] = useState(initial);
   const original = useRef(initial);
 
+  // The click that created the box can still steal focus while it finishes; refocus during that window.
+  const mountedAt = useRef(0);
   useEffect(() => {
+    mountedAt.current = performance.now();
     const el = ref.current!;
     el.focus();
     el.select();
   }, []);
 
   const done = useRef(false);
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const finish = (commit: boolean) => {
     if (done.current) return;
     done.current = true;
+    const value = valueRef.current;
     const isText = node.type === 'text';
     if (commit && value !== original.current) {
       editor.seal();
@@ -646,8 +654,20 @@ function TextEditor({ node, zoom, panX, panY }: { node: TextNode | ShapeNode; zo
       // Empty new text box: drop it silently.
       editor.apply('Delete', (d) => ({ ...d, nodes: d.nodes.filter((n) => n.id !== node.id) }));
     }
-    ui.set({ editingTextId: null });
+    if (ui.get().editingTextId === node.id) ui.set({ editingTextId: null });
   };
+  // Closed some other way (clicking elsewhere, switching tools, undo…): still keep what was typed.
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+  const alive = useRef(false);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      // Deferred so React's StrictMode remount in development does not count as closing.
+      setTimeout(() => !alive.current && finishRef.current(true), 0);
+    };
+  }, []);
 
   const lines = value.split('\n');
   const isShape = node.type === 'shape';
@@ -681,7 +701,11 @@ function TextEditor({ node, zoom, panX, panY }: { node: TextNode | ShapeNode; zo
       cols={isShape ? undefined : Math.max(4, ...lines.map((l) => l.length + 1))}
       style={{ ...style, lineHeight: 1.3 }}
       onChange={(e) => setValue(e.target.value)}
-      onBlur={() => finish(true)}
+      onBlur={() => {
+        // A blur caused by the creating click itself: take focus back instead of closing.
+        if (performance.now() - mountedAt.current < 300) return void setTimeout(() => ref.current?.focus(), 0);
+        finish(true);
+      }}
       onKeyDown={(e) => {
         e.stopPropagation();
         if (e.key === 'Escape') finish(false);
