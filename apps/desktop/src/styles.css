@@ -466,7 +466,7 @@ input.text-field { height: 26px; }
 .text-editor.label { white-space: pre-wrap; }
 
 /* ---------------------------------------------------------------- equation dock */
-.eq-dock { display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid var(--border); max-height: 46%; min-height: 34px; flex: none; }
+.eq-dock { display: flex; flex-direction: column; background: var(--panel); border-top: 1px solid var(--border); max-height: 60%; min-height: 34px; flex: none; }
 .eq-head { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 4px; min-height: 34px; min-width: 0; }
 .eq-head .btn { flex: none; }
 .dock-toggle { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 6px; border: 0; border-radius: var(--radius); background: none; color: var(--muted); }
@@ -475,7 +475,8 @@ input.text-field { height: 26px; }
 .eq-mode { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .eq-mode.editing { color: var(--accent); }
 .eq-error { color: var(--danger); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; }
-.eq-body { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; padding: 0 10px 8px; }
+.eq-body { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 0 10px 10px; }
+.eq-body::-webkit-scrollbar { display: none; }
 .eq-field { border: 1px solid var(--border-strong); border-radius: var(--radius); background: #fff; }
 .eq-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13, 124, 110, 0.14); }
 .mathfield {
@@ -503,43 +504,56 @@ input.text-field { height: 26px; }
 }
 
 /* ---------------------------------------------------------------- palette */
-.palette { display: flex; flex-direction: column; min-height: 0; padding-top: 6px; }
-.palette-tabs { display: flex; gap: 1px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
+.palette { display: flex; flex-direction: column; gap: 8px; min-height: 0; padding-top: 8px; container-type: inline-size; }
+.palette-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
 .palette-tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 9px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
   color: var(--muted);
+  font-size: 12.5px;
   white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.palette-tab:hover { color: var(--text); }
-.palette-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.palette-tab .math-icon { opacity: 0.8; }
+.palette-tab:hover { color: var(--text); background: var(--hover); }
+.palette-tab.active { color: #fff; background: var(--ink); border-color: var(--ink); }
+.palette-tab.active .math-icon { opacity: 1; }
 .palette-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
-  gap: 3px;
-  padding-top: 6px;
-  overflow-y: auto;
-  max-height: 112px;
-  scrollbar-width: thin;
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
 }
-.palette-grid.wide { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.palette-grid.wide { grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); }
 .palette-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: var(--panel);
   color: #111827;
+  box-shadow: 0 1px 0 rgba(21, 29, 48, 0.06);
+  transition: background 0.1s, border-color 0.1s, color 0.1s, transform 0.1s;
 }
-.palette-grid.wide .palette-btn { height: 48px; }
+.palette-grid.wide .palette-btn { height: 46px; }
 .palette-btn:hover { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+.palette-btn:active { transform: translateY(1px); }
+/* Narrow docks: inactive tabs show only their symbol (the name stays in the tooltip). */
+@container (max-width: 1040px) {
+  .palette-tab:not(.active) { padding: 0 9px; }
+  .palette-tab:not(.active) span { display: none; }
+}
 .math-icon { display: block; overflow: visible; flex: none; }
 
 /* ---------------------------------------------------------------- status bar */
