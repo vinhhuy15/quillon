@@ -1,7 +1,7 @@
 // Renders the trailer frame by frame with headless Chrome.
 // 1. math.js: equation SVGs typeset by Quillon itself (needs `npm run dev` on :1420).
 // 2. frames/: one JPEG per frame, by calling window.render(t) in index.html.
-// Usage: node marketing/trailer/render.mjs [--fps 30] [--only 0,5.2,11] [--skip-math]
+// Usage: node marketing/trailer/render.mjs [--fps 30] [--only 0,5.2,11] [--skip-math] [--poster]
 // Encode afterwards with encode.m (MATLAB) or any H.264 encoder.
 import { spawn } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
@@ -80,7 +80,7 @@ if (!args.includes('--skip-math') || !existsSync(join(DIR, 'math.js'))) {
 }
 
 // ---- 2. frames
-await send('Page.navigate', { url: pathToFileURL(join(DIR, 'index.html')).href });
+await send('Page.navigate', { url: pathToFileURL(join(DIR, 'index.html')).href + (args.includes('--poster') ? '?poster' : '') });
 await sleep(2500);
 await run(`await document.fonts.ready; await Promise.all([...document.images].map((i) => i.decode().catch(() => {})));`);
 const duration = await run('return window.DURATION');

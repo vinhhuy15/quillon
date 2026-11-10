@@ -24,6 +24,14 @@ figures with micrographs, scale bars and insets. Everything lives on one page,
 renders with real TeX typography, and goes straight into **Word** (as native, editable equations) or
 **LaTeX** (as TikZ).
 
+<div align="center">
+
+[![Watch the Quillon trailer (44 s)](docs/images/trailer-poster.jpg)](https://github.com/vinhhuy15/quillon/releases/download/v0.4.0/quillon-trailer.mp4)
+
+<sub>44-second tour of Quillon 0.4 · <a href="https://github.com/vinhhuy15/quillon/releases/download/v0.4.0/quillon-trailer.mp4">download the MP4</a></sub>
+
+</div>
+
 ## Download
 
 | Platform | |
